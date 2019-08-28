@@ -1,8 +1,9 @@
 pragma solidity ^0.5.0;
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "./IFlightSuretyData.sol";
 
-contract FlightSuretyData {
+contract FlightSuretyData is IFlightSuretyData {
     using SafeMath for uint256;
 
     /********************************************************************************************/
@@ -12,6 +13,7 @@ contract FlightSuretyData {
     address private contractOwner;                                      // Account used to deploy contract
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
 
+   mapping(address => uint256) private authorizedContracts; 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
@@ -92,6 +94,15 @@ contract FlightSuretyData {
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
+
+    function authorizeContract(address contractAddress) external requireContractOwner {
+        require(contractAddress != address(0x0),"Invalid contract");
+        authorizedContracts[contractAddress] = 1 ;
+    }
+
+    function deAuthorizeContract(address contractAddress) external requireContractOwner {
+        delete authorizedContracts[contractAddress];
+    }
 
    /**
     * @dev Add an airline to the registration queue
