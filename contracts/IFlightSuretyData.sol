@@ -3,9 +3,19 @@ pragma solidity ^0.5.0;
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract IFlightSuretyData {
+    // Flight status codees
+    enum FlightStatus { 
+        STATUS_CODE_UNKNOWN, 
+        STATUS_CODE_ON_TIME,
+        STATUS_CODE_LATE_AIRLINE,
+        STATUS_CODE_LATE_WEATHER,
+        STATUS_CODE_LATE_TECHNICAL,
+        STATUS_CODE_LATE_OTHER
+    }
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
+
 
    /**
     * @dev Add an airline to the registration queue
