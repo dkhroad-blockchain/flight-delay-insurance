@@ -22,14 +22,14 @@ contract IFlightSuretyData {
     *      Can only be called from FlightSuretyApp contract
     *
     */   
-    function registerAirline() external pure; 
+    function registerAirline(address airline, string calldata name) external payable returns(bool,bool); 
 
 
    /**
     * @dev Buy insurance for a flight
     *
     */   
-    function buy() external payable;
+    function buy(address customer, uint256 flightKey) external payable;
 
     /**
      *  @dev Credits payouts to insurees
@@ -48,7 +48,7 @@ contract IFlightSuretyData {
     *      resulting in insurance payouts, the contract should be self-sustaining
     *
     */   
-    function fund() public payable; 
+    function fund(address airline) external payable; 
 
     function getFlightKey(
         address airline,
