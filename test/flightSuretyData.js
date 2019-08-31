@@ -55,7 +55,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
 
 
   describe('authorizeContract', async () => {
-    xit("only owner can set authorizeContract address", async () => {
+    it("only owner can set authorizeContract address", async () => {
     });
 
     xit("only authorizeContract can make calls", async () => {

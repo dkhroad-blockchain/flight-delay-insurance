@@ -5,38 +5,58 @@ pragma solidity ^0.5.8;
 // More info: https://www.nccgroup.trust/us/about-us/newsroom-and-events/blog/2018/november/smart-contract-insecurity-bad-arithmetic/
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "../node_modules/openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
+import "../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./IFlightSuretyData.sol";
-import "./Ownable.sol";
+import "./MultiSig.sol";
 
 /************************************************** */
 /* FlightSurety Smart Contract                      */
 /************************************************** */
-contract FlightSuretyApp is Ownable {
+contract FlightSuretyApp is Ownable, Pausable, MultiSig {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types 
                                 //(similar to "prototype" in Javascript)
 
 
     IFlightSuretyData flightSuretyDataContract;
+    uint256 totalRegisteredAirlines;
+    uint256 totalEligibleAirlines;
+
+    uint256 private airlineMinimumFundsRequirement = 10 ether;
+
+    uint256 public constant REGISTER_AIRLINE = 1;// for transaction id for multi sig consesus 
+
+    event AirlineRegistered(address indexed airline, address indexed by);
+    event AirlineFunded(address indexed airline,uint256 value);
  
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/
 
-    // Modifiers help avoid duplication of code. They are typically used to validate something
-    // before a function is allowed to be executed.
 
+    modifier whenFunded() {
+        uint256 balance = flightSuretyDataContract.getAirlineBalance(msg.sender);
+        require(balance >= airlineMinimumFundsRequirement,"Caller is not funded");
+        _;
+    }
 
+    modifier whenRegistered() {
+        require (isSigner(msg.sender),"Caller is not registered");
+        _;
+    }
 
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
     /********************************************************************************************/
 
     /**
-    * @dev Contract constructor
-    *
+    * @dev Contract constructor.
+    *      Implictly registerd but not funded.
+    *      Can take part in multi-party consensus due to the fact that 
+    *      it is the only signer role.
+    *      But cannot register a new airline unless it is funded.
     */
-    constructor(address dataContract) public 
-    {
+    constructor(address dataContract) public {
         flightSuretyDataContract = IFlightSuretyData(dataContract);
     }
 
@@ -61,15 +81,58 @@ contract FlightSuretyApp is Ownable {
     * @dev Add an airline to the registration queue
     *
     */   
-    function registerAirline
-                            (   
-                            )
+    function registerAirline(address airline,string calldata name)
                             external
-                            pure
-                            returns(bool success, uint256 votes)
+                            payable
+                            whenNotPaused
+                            whenFunded
+                            onlyConfirmed(REGISTER_AIRLINE)
     {
-        return (success, 0);
+        
+        flightSuretyDataContract.registerAirline(airline,name); 
+        totalRegisteredAirlines += 1;
+        emit AirlineRegistered(airline,msg.sender);
     }
+
+    function fund(address airline) external payable whenNotPaused {
+        _fund(airline);
+    }
+
+    function _fund(address airline) internal {
+        uint256 balance = flightSuretyDataContract.fund.value(msg.value)(airline);
+        if (balance >= airlineMinimumFundsRequirement) {
+            flightSuretyDataContract.setAirlineFundingStatus(airline,true);
+            _updateAirlineEligibiltyStatus(airline,balance);
+        }
+    }
+
+    function _updateAirlineEligibiltyStatus(address airline,uint256 balance) internal {
+        if (balance >= airlineMinimumFundsRequirement) {
+            totalEligibleAirlines += 1;
+            _updateRegistrationRequirements(REGISTER_AIRLINE,airline,totalEligibleAirlines);
+            emit AirlineFunded(airline,msg.value);
+        } 
+    }
+
+    function _updateRegistrationRequirements(uint256 tid,address airline,uint256 eligible) internal {
+        totalEligibleAirlines = eligible;
+        if (!isSigner(airline)) {
+            addSigner(airline);
+        }
+        uint256 newRequirements = _calculateRequirements(eligible);
+        if (newRequirements != required[tid]) {
+            changeRequirements(tid,newRequirements);
+        }
+    }
+
+    function _calculateRequirements(uint256 eligible) internal pure returns(uint256) {
+       if (eligible > 0 && eligible < 5) {
+           return 1;
+       } else {
+            return(eligible.mul(50).div(100));
+       }
+    }
+
 
 
    /**
@@ -123,6 +186,10 @@ contract FlightSuretyApp is Ownable {
         emit OracleRequest(index, airline, flight, timestamp);
     } 
 
+
+    function setAirlineMinimumFunds(uint256 minFund) external onlyWhitelistAdmin  {
+        airlineMinimumFundsRequirement = minFund;
+    }
 
 // region ORACLE MANAGEMENT
 
@@ -294,5 +361,12 @@ contract FlightSuretyApp is Ownable {
     }
 
 // endregion
+    /**
+    * @dev Fallback function for funding smart contract.
+    *
+    */
+    function() external payable {
+        require(msg.data.length == 0,"payload not allowed");
+    }
 
 }   

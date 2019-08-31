@@ -37,19 +37,19 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     mapping(address => uint256) private creditbalances;
     mapping(address => uint256) private authorizedContracts; 
 
-    uint256 private airlineMinimumFundsRequirement;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
 
+    event Authorized(address indexed contractAddress);
+    event DeAuthorized(address indexed contractAddress);
 
     /**
     * @dev Constructor
     *      The deploying account becomes contractOwner
     */
     constructor () public {
-        airlineMinimumFundsRequirement = 10 ether;
     }
 
     /********************************************************************************************/
@@ -57,9 +57,15 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     /********************************************************************************************/
 
     modifier fromAuthorized() {
-        require(authorizedContracts[msg.sender] == 1,"Calling contract is not an authorized");
+        require(authorizedContracts[msg.sender] == 1,"Calling contract is not authorized");
         _;
     }
+
+    modifier notRegistered(address airline) {
+        require(airlines[airline].isRegistered == false,"Airline is already registered.");
+        _;
+    }
+
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
@@ -68,10 +74,12 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     function authorizeContract(address contractAddress) external onlyOwner {
         require(contractAddress != address(0x0),"Invalid contract");
         authorizedContracts[contractAddress] = 1 ;
+        emit Authorized(contractAddress);
     }
 
     function deAuthorizeContract(address contractAddress) external onlyOwner {
         delete authorizedContracts[contractAddress];
+        emit DeAuthorized(contractAddress);
     }
 
    /**
@@ -84,16 +92,18 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
                             payable
                             whenNotPaused
                             fromAuthorized
-                            returns(bool,bool)
+                            notRegistered(airline)
     {
         airlines[airline].name = name;
         airlines[airline].isRegistered = true;
-        this.fund(airline);
-        if (airlines[airline].isFunded) {
-            return (true,true);
-        } else {
-            return (false,false);
-        }
+    }
+
+    function setAirlineFundingStatus(address airline, bool status) external whenNotPaused fromAuthorized {
+        airlines[airline].isFunded = status;
+    }
+
+    function getAirlineBalance(address airline) external whenNotPaused fromAuthorized returns(uint256){
+       return airlines[airline].balance;
     }
 
 
@@ -146,14 +156,11 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     function fund(address airline)
                             external
                             payable
+                            returns(uint256)
     {
-        if (msg.value == 0) {
-            return;
-        }
-        airlines[airline].balance.add(msg.value);
-        if (airlines[airline].balance >= airlineMinimumFundsRequirement) {
-            airlines[airline].isFunded = true;
-        }
+        require(msg.value > 0,"Must use ether to fund");
+        airlines[airline].balance = airlines[airline].balance.add(msg.value);
+        return airlines[airline].balance;
     }
 
     function getFlightKey
@@ -169,9 +176,6 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         return keccak256(abi.encodePacked(airline, flight, timestamp));
     }
 
-    function setAirlineMinimumFunds(uint256 minFund) external fromAuthorized {
-        airlineMinimumFundsRequirement = minFund;
-    }
 
 
     /**
