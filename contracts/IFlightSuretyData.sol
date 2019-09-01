@@ -26,6 +26,7 @@ contract IFlightSuretyData {
 
     function setAirlineFundingStatus(address airline, bool status) external; 
     function getAirlineBalance(address airline) external returns(uint256);
+    function isAirlineRegistered(address caller) external returns(bool); 
 
 
    /**

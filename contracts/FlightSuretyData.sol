@@ -82,6 +82,10 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         emit DeAuthorized(contractAddress);
     }
 
+    function isAirlineRegistered(address caller) external whenNotPaused fromAuthorized returns(bool) {
+        return airlines[caller].isRegistered;
+    }
+
    /**
     * @dev Add an airline to the registration queue
     *      Can only be called from FlightSuretyApp contract
@@ -98,6 +102,10 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         airlines[airline].isRegistered = true;
     }
 
+    /**
+      * @dev set the funding status
+      * only app contract knows the logic
+      */
     function setAirlineFundingStatus(address airline, bool status) external whenNotPaused fromAuthorized {
         airlines[airline].isFunded = status;
     }
