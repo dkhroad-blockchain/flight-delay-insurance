@@ -27,6 +27,10 @@ contract MultiSig is SignerRole, WhitelistAdminRole {
 
     }
 
+    modifier onlyWhitelistAdminOrSigner() {
+        require(isWhitelistAdmin(msg.sender) || isSigner(msg.sender),"Must be a signer or whitelisted admin");
+        _;
+    }
 
     modifier onlyConfirmed(uint256 transactionId) {
         require(!_alreadyConfirmedBy(transactionId,msg.sender),"Caller already confirmed");
@@ -67,7 +71,7 @@ contract MultiSig is SignerRole, WhitelistAdminRole {
         uint256 transactionId, uint256 _required
     )   
         internal 
-        onlyWhitelistAdmin 
+        onlyWhitelistAdminOrSigner
         validRequirements(transactionId,_required) 
     {
         emit RequirementChanged(transactionId,required[transactionId],_required);

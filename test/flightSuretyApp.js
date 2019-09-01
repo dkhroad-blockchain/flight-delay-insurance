@@ -4,6 +4,13 @@ const FlightSuretyData = artifacts.require('FlightSuretyData');
 
 contract('Flight Surety App Tests', async (accounts) => {
 
+  before(async () => {
+
+    accounts.forEach((a,i) => {
+      console.log(`accounts[${i}]: ${a}`);
+    });
+  });
+
   beforeEach('setup contract', async () => {
     this.accounts = accounts;
     this.flightSuretyData = await FlightSuretyData.new();
@@ -83,21 +90,70 @@ contract('Flight Surety App Tests', async (accounts) => {
         });
       });
 
-      describe.skip('when 5 or more airlines registered', async () => {
+      describe('when 5 or more airlines are registered', async () => {
         beforeEach(async () => {
-          await this.flightSuretyApp.registerAirline(this.accounts[1],"A1");
-          await this.flightSuretyApp.fund(this.accounts[1],
-            { value: web3.utils.toWei("2","ether"), 
-              from: this.accounts[1]});
         });
         it("requires 50% of funded airlines to register a new airline", async () => {
+
+          // this.accounts.slice(1,2).forEach( async (account,idx) => { 
+          //   console.log("account[" + idx + "] =" + account + ": registering");
+          //   await this.flightSuretyApp.registerAirline(account,"AA");
+          //   console.log("account[" + idx + "] =" + account + ": funding");
+          //   await this.flightSuretyApp.fund(account,
+          //     { value: web3.utils.toWei("2","ether"), 
+          //       from: account }
+          //   );
+          // });
+          let tx;
+
+          tx = await this.flightSuretyApp.registerAirline(this.accounts[1],"A1");
+          expectEvent.inLogs(tx.logs,"AirlineRegistered",{airline: this.accounts[1]});
+
+          tx = await this.flightSuretyApp.fund(this.accounts[1], { 
+            value: web3.utils.toWei("2","ether"), 
+            from: this.accounts[1] 
+          });
+          expectEvent.inLogs(tx.logs,"AirlineFunded",{airline: this.accounts[1]});
+
+          tx = await this.flightSuretyApp.registerAirline(this.accounts[2],"A2");
+          expectEvent.inLogs(tx.logs,"AirlineRegistered",{airline: this.accounts[2]});
+
+          tx = await this.flightSuretyApp.fund(this.accounts[2], { 
+            value: web3.utils.toWei("2","ether"), 
+            from: this.accounts[2] 
+          });
+          expectEvent.inLogs(tx.logs,"AirlineFunded",{airline: this.accounts[2]});
+
+          tx = await this.flightSuretyApp.registerAirline(this.accounts[3],"A3");
+          expectEvent.inLogs(tx.logs,"AirlineRegistered",{airline: this.accounts[3]});
+
+          tx = await this.flightSuretyApp.fund(this.accounts[3], { 
+            value: web3.utils.toWei("2","ether"), 
+            from: this.accounts[3] 
+          });
+          expectEvent.inLogs(tx.logs,"AirlineFunded",{airline: this.accounts[3]});
+
+          tx = await this.flightSuretyApp.registerAirline(this.accounts[4],"A4");
+          expectEvent.inLogs(tx.logs,"AirlineRegistered",{airline: this.accounts[4]});
+
+          tx = await this.flightSuretyApp.fund(this.accounts[4], { 
+            value: web3.utils.toWei("2","ether"), 
+            from: this.accounts[4] 
+          });
+          expectEvent.inLogs(tx.logs,"AirlineFunded",{airline: this.accounts[4]});
+          expectEvent.inLogs(tx.logs,"RequirementChanged",{current: new BN(2)});
+
+          await this.flightSuretyApp.registerAirline(this.accounts[5],"A5");
+          tx = await this.flightSuretyApp.registerAirline(this.accounts[5],"A5",{from: this.accounts[1]});
+          expectEvent.inLogs(tx.logs,"AirlineRegistered",{airline: this.accounts[5]});
+
         });
       });
 
       describe('when not registered', async() => {
         it("cannot register an airline",async () => {
-          let newAirline1 = this.accounts[3];
-          let newAirline2 = this.accounts[4];
+          let newAirline1 = this.accounts[8];
+          let newAirline2 = this.accounts[9];
           await expectRevert(
             this.flightSuretyApp.registerAirline(newAirline2,"A2",{from: newAirline1 } ),
             "Caller is not registered"

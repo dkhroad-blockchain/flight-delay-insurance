@@ -28,6 +28,8 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig {
 
     event AirlineRegistered(address indexed airline, address indexed by);
     event AirlineFunded(address indexed airline,uint256 value);
+    event AirlineNotFunded(address indexed airline,uint256 value);
+    event NotRegistered(address indexed airline);
  
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
@@ -49,7 +51,7 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig {
 
     // overriding base class SignerRole's modifier
     modifier onlySigner() {
-        require(_isFunded(),"Caller is not a funded signer");
+        require(isSigner(msg.sender) || _isFunded(),"Caller is not a funded signer");
         _;
     }
 
@@ -131,6 +133,8 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig {
             totalEligibleAirlines += 1;
             flightSuretyDataContract.setAirlineFundingStatus(airline,true);
             _updateRegistrationRequirements(REGISTER_AIRLINE);
+        } else {
+            emit AirlineNotFunded(airline,msg.value);
         }
     }
 
