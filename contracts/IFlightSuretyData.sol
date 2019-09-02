@@ -21,6 +21,8 @@ contract IFlightSuretyData {
     event PolicyPurchased(address indexed customer, uint256 indexed policy, uint256 flight, uint256 timestamp);
     event FlightStatusUpdated(uint256 policy,uint256 indexed flight,FlightStatus indexed status, uint256 timestamp);
     event FlightRegistered(address indexed airline,uint256 indexed flight,string name);
+    event InsuranceCredit(address indexed customer,uint256 payout,uint256 policy);
+    event Payout(address indexed customer,uint256 ammount);
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
@@ -52,14 +54,14 @@ contract IFlightSuretyData {
     /**
      *  @dev Credits payouts to insurees
     */
-    function creditInsurees() external pure;
+    function creditInsurees(uint256 policy,FlightStatus staus,uint256 times) external;
     
 
     /**
      *  @dev Transfers eligible payout funds to insuree
      *
     */
-    function pay() external pure;
+    function pay() external payable;
 
    /**
     * @dev Initial funding for the insurance. Unless there are too many delayed flights

@@ -66,7 +66,16 @@ contract('Flight Surety Data Tests', async (accounts) => {
       let timestamp = new Date().getTime();
       let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
       await expectRevert(
-        this.flightSuretyData.buy(this.accounts[2],policy,flight,timestamp),
+        this.flightSuretyData.buy(
+          this.accounts[2],
+          policy,
+          flight,
+          timestamp,
+          {
+            value: web3.utils.toWei("1","ether"),
+            from: this.accounts[2]
+          }
+        ),
         "Calling contract is not authorized"
       );
     });
@@ -75,6 +84,9 @@ contract('Flight Surety Data Tests', async (accounts) => {
   describe("when authorized", async () => {
     beforeEach(async () => { 
       this.flightSuretyData.authorizeContract(this.accounts[0]);
+      this.flightSuretyData.authorizeContract(this.accounts[1]);
+      this.flightSuretyData.authorizeContract(this.accounts[2]);
+      this.flightSuretyData.authorizeContract(this.accounts[3]);
     });
 
 
@@ -95,7 +107,11 @@ contract('Flight Surety Data Tests', async (accounts) => {
       it("can buy flight insurance", async () => {
         let timestamp = new Date().getTime();
         let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
-        let tx = await this.flightSuretyData.buy(this.accounts[2],policy,flight,timestamp);
+        let tx = await this.flightSuretyData.buy(this.accounts[2],policy,flight,timestamp,
+          {
+            value: web3.utils.toWei("1","ether"),
+            from: this.accounts[2]
+          });
         expectEvent.inLogs(
           tx.logs,
           "PolicyPurchased",
@@ -107,7 +123,11 @@ contract('Flight Surety Data Tests', async (accounts) => {
           }
         );
         // multiple customers can buy the the same policy
-        tx = await this.flightSuretyData.buy(this.accounts[3],policy,flight,timestamp);
+        tx = await this.flightSuretyData.buy(this.accounts[3],policy,flight,timestamp,
+          {
+            value: web3.utils.toWei("1","ether"),
+            from: this.accounts[2]
+          });
         expectEvent.inLogs(
           tx.logs,
           "PolicyPurchased",
@@ -141,7 +161,11 @@ contract('Flight Surety Data Tests', async (accounts) => {
       let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
       beforeEach(async () => {
         await this.flightSuretyData.registerFlight( this.accounts[1], "UA256", flight);
-        await this.flightSuretyData.buy(this.accounts[3],policy,flight,timestamp);
+        await this.flightSuretyData.buy(this.accounts[3],policy,flight,timestamp,
+          {
+            value: web3.utils.toWei("1","ether"),
+            from: this.accounts[2]
+          });
       });
 
       it("cannot set flight status on a non existent policy", async () => {

@@ -44,7 +44,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     }
     
     mapping(uint256 => Policy) private policies;
-    mapping(address => uint256) private creditbalances;
+    mapping(address => uint256) private creditBalances;
     mapping(address => uint256) private authorizedContracts; 
 
 
@@ -180,6 +180,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
                             validFlight(flightKey)
                             validPolicyState(policyKey)
     {
+        require(msg.value > 0,"No ether provided.");
         Policy storage policy = policies[policyKey];
 
         require(policy.expectedTimestamp == 0 || 
@@ -233,13 +234,30 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
 
     /**
      *  @dev Credits payouts to insurees
+     *  @param status flight status for which a payout should occur
+     *  @param times  payout multiple for the original ammount.
+     *                Calling (App) contract is responsible for providing the sanitized value.
+     *                By keeping this logic in the app contract, we won't have to update/migrate
+     *                to a new data contract if payout logic changes.
     */
-    function creditInsurees
-                                (
-                                )
-                                external
-                                pure
+    function creditInsurees(
+        uint256 policyKey,
+        FlightStatus status,
+        uint256 times
+    )
+        external
+        whenNotPaused 
+        fromAuthorized 
     {
+        Policy memory policy = policies[policyKey];
+        require(policy.statusCode == status,"Unexpected policy state");
+        Insurance[] memory insuree = policy.insuree;
+        for (uint256 i; i< insuree.length; i++) {
+            uint256 payout = insuree[i].price.mul(times);
+            address thisCustomer = insuree[i].customer;
+            creditBalances[thisCustomer] = creditBalances[thisCustomer].add(payout);
+            emit InsuranceCredit(thisCustomer,payout,policyKey);
+        }
     }
     
 
@@ -247,12 +265,13 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
      *  @dev Transfers eligible payout funds to insuree
      *
     */
-    function pay
-                            (
-                            )
-                            external
-                            pure
-    {
+    function pay() external payable whenNotPaused {
+        require(msg.sender == tx.origin,"Only EOAs can receive payout.");
+        uint256 balance = creditBalances[msg.sender];
+        require(balance > 0,"No payout balance.");
+        creditBalances[msg.sender] = 0;
+        msg.sender.transfer(balance);
+        emit Payout(msg.sender,balance);
     }
 
    /**
