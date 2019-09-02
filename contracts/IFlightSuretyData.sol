@@ -12,6 +12,16 @@ contract IFlightSuretyData {
         STATUS_CODE_LATE_TECHNICAL,
         STATUS_CODE_LATE_OTHER
     }
+
+    /********************************************************************************************/
+    /*                                       EVENT DEFINITIONS                                  */
+    /********************************************************************************************/
+    event AirlineRegistered(address indexed airline,string name, address indexed by);
+    event AirlineFunded(address indexed airline,uint256 value);
+    event PolicyPurchased(address indexed customer, uint256 indexed policy, uint256 flight, uint256 timestamp);
+    event FlightStatusUpdated(uint256 policy,uint256 indexed flight,FlightStatus indexed status, uint256 timestamp);
+    event FlightRegistered(address indexed airline,uint256 indexed flight,string name);
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -28,12 +38,16 @@ contract IFlightSuretyData {
     function getAirlineBalance(address airline) external returns(uint256);
     function isAirlineRegistered(address caller) external returns(bool); 
 
+    function getAirline(uint256 flight) external returns(address);
+    function registerFlight (address airline,string calldata name,uint256 flight) external; 
 
    /**
     * @dev Buy insurance for a flight
     *
     */   
-    function buy(address customer, uint256 flightKey) external payable;
+    function buy(address customer, uint256 policyKey, uint256 flightKey,uint256 timestamp) external payable;
+    function setFlightStatus(uint256 policyKey,uint256 timestamp,FlightStatus statusCode) external;
+    function getFlightStatus(uint256 policyKey) external view returns(FlightStatus);
 
     /**
      *  @dev Credits payouts to insurees
@@ -53,16 +67,6 @@ contract IFlightSuretyData {
     *
     */   
     function fund(address airline) external payable returns(uint256); 
-
-    function getFlightKey(
-        address airline,
-        string memory flight,
-        uint256 timestamp
-    )
-        pure
-        internal
-        returns(bytes32);
-
 
 }
 

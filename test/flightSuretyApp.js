@@ -148,6 +148,9 @@ contract('Flight Surety App Tests', async (accounts) => {
           expectEvent.inLogs(tx.logs,"AirlineRegistered",{airline: this.accounts[5]});
 
         });
+
+        xit("A registered but not funded airline does not participate in the contract (multi-party consensus)", async () => {
+        });
       });
 
       describe('when not registered', async() => {

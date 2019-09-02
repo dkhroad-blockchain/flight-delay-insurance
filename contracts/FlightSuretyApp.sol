@@ -26,8 +26,12 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig {
 
     uint256 public constant REGISTER_AIRLINE = 1;// for transaction id for multi sig consesus 
 
-    event AirlineRegistered(address indexed airline, address indexed by);
+    event AirlineRegistered(address indexed airline, string name, address indexed by);
     event AirlineFunded(address indexed airline,uint256 value);
+    event PolicyPurchased(address indexed customer, uint256 indexed policy, uint256 flight, uint256 timestamp);
+    event FlightStatusUpdated(uint256 indexed flight,uint256 indexed status, uint256 timestamp);
+    event FlightRegistered(address indexed airline,uint256 indexed flight,string name);
+
     event AirlineNotFunded(address indexed airline,uint256 value);
     event NotRegistered(address indexed airline);
  
@@ -66,13 +70,14 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig {
 
     /**
     * @dev Contract constructor.
-    *      Implictly registerd but not funded.
-    *      Can take part in multi-party consensus due to the fact that 
-    *      it is the only signer role.
-    *      But cannot register a new airline unless it is funded.
     */
     constructor(address dataContract) public {
         flightSuretyDataContract = IFlightSuretyData(dataContract);
+
+        // the base constructor of SignerRole makes the deployer 
+        // signer by default. Since only a funded party can be
+        // be a signer (to be able to take part in the multi-party consesus,
+        // we must remove the deployer from a SignerRole.
         renounceSigner();
     }
 
@@ -93,7 +98,7 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig {
     /********************************************************************************************/
 
     /**
-      * register and fund the first airline
+      * @dev register and fund the first airline
       */
     function bootstrap(string calldata name) external payable onlyOwner {
         _registerAirline(msg.sender,name);
@@ -118,7 +123,7 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig {
     function _registerAirline(address airline,string memory name) internal {
         flightSuretyDataContract.registerAirline(airline,name); 
         totalRegisteredAirlines += 1;
-        emit AirlineRegistered(airline,msg.sender);
+        // emit AirlineRegistered(airline,msg.sender);
     }
 
     function fund(address airline) external payable whenNotPaused whenRegistered {
@@ -128,7 +133,7 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig {
     function _fund(address airline) internal {
         uint256 balance = flightSuretyDataContract.fund.value(msg.value)(airline);
         if (balance >= airlineMinimumFundsRequirement) {
-            emit AirlineFunded(airline,msg.value);
+            // emit AirlineFunded(airline,msg.value);
             addSigner(airline);
             totalEligibleAirlines += 1;
             flightSuretyDataContract.setAirlineFundingStatus(airline,true);
@@ -155,20 +160,69 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig {
     }
 
 
+    modifier onlyOwnerAirline(address airline) {
+        require(msg.sender == airline,"Only owner airline can register its flight");
+        _;
+    }
 
    /**
     * @dev Register a future flight for insuring.
-    *
+    * flight must belong to one of the registered airlines.
     */  
-    function registerFlight
-                                (
-                                )
-                                external
-                                pure
+    function registerFlight(
+        address airline,
+        string calldata flightName
+    ) 
+        external
+        whenNotPaused
+        onlyOwnerAirline(airline)
+        onlySigner
     {
+        uint256 key = uint256(keccak256(abi.encodePacked(flightName)));
+        address airlineForFlight = flightSuretyDataContract.getAirline(key);
 
+        // check for flight names collusion. 
+        // should not happen if all flight names are prefixed with the flight name (e.g. UA256)
+        require(airlineForFlight == address(0x0),"Airline is already registered");
+
+        flightSuretyDataContract.registerFlight(airline,flightName,key);
+    }
+
+    function buy(
+        address customer,
+        string calldata flight,
+        uint256 timestamp
+    )
+        external
+        payable 
+        whenNotPaused
+    {
+        //TODO: make max price configurable.
+        require(msg.value <= 1 ether,"Max. allowable insurace price is 1 ether"); 
+        uint256 flightKey = getFlightKey(flight);
+        address airline = flightSuretyDataContract.getAirline(flightKey);
+        require(airline != address(0x0),"Unregistered flight");
+
+        uint256 policyKey = getPolicyKey(airline,flight,timestamp);
+        flightSuretyDataContract.buy(customer,policyKey,flightKey,timestamp);
+    }
+
+
+    function getFlightKey(string memory flight) pure internal returns(uint256) {
+        return uint256(keccak256(abi.encodePacked(flight)));
     }
     
+    function getPolicyKey(
+        address airline,
+        string memory flight,
+        uint256 timestamp
+    )
+        pure
+        internal
+        returns(uint256) 
+    {
+        return uint256(keccak256(abi.encodePacked(airline, flight, timestamp)));
+    }
    /**
     * @dev Called after oracle has updated flight status
     *
@@ -178,11 +232,13 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig {
                                     address airline,
                                     string memory flight,
                                     uint256 timestamp,
-                                    uint8 statusCode
+                                    uint256 statusCode
                                 )
                                 internal
-                                pure
     {
+        uint256 policyKey = getPolicyKey(airline,flight,timestamp);
+        flightSuretyDataContract.setFlightStatus(policyKey,timestamp,IFlightSuretyData.FlightStatus(statusCode));
+
     }
 
 
@@ -207,7 +263,10 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig {
         emit OracleRequest(index, airline, flight, timestamp);
     } 
 
-
+    /**
+      * @dev sets the minimum amount funds required to take part in the 
+      * contract. 
+      */
     function setAirlineMinimumFunds(uint256 minFund) external onlyWhitelistAdmin  {
         airlineMinimumFundsRequirement = minFund;
     }
@@ -324,18 +383,6 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig {
     }
 
 
-    function getFlightKey
-                        (
-                            address airline,
-                            string memory flight,
-                            uint256 timestamp
-                        )
-                        pure
-                        internal
-                        returns(bytes32) 
-    {
-        return keccak256(abi.encodePacked(airline, flight, timestamp));
-    }
 
     // Returns array of three non-duplicating integers from 0-9
     function generateIndexes

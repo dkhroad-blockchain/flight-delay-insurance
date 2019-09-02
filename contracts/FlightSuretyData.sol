@@ -20,20 +20,30 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     }
     mapping(address => Airline) private airlines;
 
+
     struct Flight {
         bool isRegistered;
-        uint8 statusCode;
-        uint256 updatedTimestamp;        
         address airline;
+        string name;
     }
-    mapping(bytes32 => Flight) private flights;
+
+    
+    mapping(uint256 => Flight) private flights;
 
     struct Insurance {
         address customer;
         uint256 price;
     }
+
+    struct Policy {
+        Insurance[] insuree;
+        uint256 flight;
+        uint256 expectedTimestamp;  
+        uint256 actualTimestamp;  // provided by an Oracle
+        FlightStatus statusCode;
+    }
     
-    mapping(uint256 => Insurance[]) private purchasedPolicy;
+    mapping(uint256 => Policy) private policies;
     mapping(address => uint256) private creditbalances;
     mapping(address => uint256) private authorizedContracts; 
 
@@ -65,6 +75,23 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         require(airlines[airline].isRegistered == false,"Airline is already registered.");
         _;
     }
+
+    modifier validPolicy(uint256 key) {
+        require(policies[key].statusCode == FlightStatus.STATUS_CODE_UNKNOWN,"Expired policy.");
+        require(policies[key].flight != 0, "Non-existent policy.");
+        _;
+    }
+
+    modifier validPolicyState(uint256 key) {
+        require(policies[key].statusCode == FlightStatus.STATUS_CODE_UNKNOWN,"Invalid or expired policy.");
+        _;
+    }
+
+    modifier validFlight(uint256 key) {
+        require(flights[key].isRegistered,"Unregistered flight.");
+        _;
+    }
+
 
 
     /********************************************************************************************/
@@ -100,6 +127,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     {
         airlines[airline].name = name;
         airlines[airline].isRegistered = true;
+        emit AirlineRegistered(airline,name,msg.sender);
     }
 
     /**
@@ -115,21 +143,92 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     }
 
 
+    function registerFlight(
+        address airline,
+        string calldata name,
+        uint256 flight
+    ) 
+        external
+        whenNotPaused
+        fromAuthorized
+    { 
+        flights[flight].airline = airline;
+        flights[flight].isRegistered = true;
+        flights[flight].name = name;
+        emit FlightRegistered(airline,flight,name);
+    }
+
+   /**
+    * returns the airline for a flight
+    * @param flight keccak256 hash of the flight
+    * @return address of the airline to which this flight belongs to
+    *
+    */   
+    function getAirline(uint256 flight) external whenNotPaused fromAuthorized returns(address) {
+        return flights[flight].airline; 
+    }
    /**
     * @dev Buy insurance for a flight
     *
     */   
 
-    function buy(address customer,uint256 flightKey)
+    function buy(address customer,uint256 policyKey,uint256 flightKey,uint256 timestamp)
                             external
                             payable
                             whenNotPaused
                             fromAuthorized
+                            validFlight(flightKey)
+                            validPolicyState(policyKey)
     {
+        Policy storage policy = policies[policyKey];
+
+        require(policy.expectedTimestamp == 0 || 
+                policy.expectedTimestamp == timestamp,"Invalid policy");
+        require(policy.flight == 0 || 
+                policy.flight == flightKey,"Invalid flight");
+
+        if (policy.expectedTimestamp == 0) {
+            policy.expectedTimestamp = timestamp;
+        }
+
+        if (policy.flight == 0) {
+            policy.flight = flightKey;
+        }
+
         Insurance memory insurance;
+
         insurance.customer = customer;
         insurance.price = msg.value;
-        purchasedPolicy[flightKey].push(insurance);
+
+        policies[policyKey].insuree.push(insurance);
+        emit PolicyPurchased(customer,policyKey,policy.flight,timestamp);
+    }
+
+    function setFlightStatus(
+        uint256 policyKey,
+        uint256 timestamp,
+        FlightStatus statusCode
+    ) 
+        external
+        whenNotPaused 
+        fromAuthorized 
+        validPolicy(policyKey)
+    {
+        policies[policyKey].statusCode = statusCode;
+        policies[policyKey].actualTimestamp = timestamp;
+       
+        Policy memory policy = policies[policyKey];
+        
+        emit FlightStatusUpdated(policyKey,policy.flight,policy.statusCode,policy.actualTimestamp);
+    }
+
+    function getFlightStatus(uint256 policyKey)
+        external
+        whenNotPaused 
+        fromAuthorized 
+        view
+        returns(FlightStatus) {
+        return policies[policyKey].statusCode;
     }
 
     /**
@@ -168,21 +267,10 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     {
         require(msg.value > 0,"Must use ether to fund");
         airlines[airline].balance = airlines[airline].balance.add(msg.value);
+        emit AirlineFunded(airline,airlines[airline].balance);
         return airlines[airline].balance;
     }
 
-    function getFlightKey
-                        (
-                            address airline,
-                            string memory flight,
-                            uint256 timestamp
-                        )
-                        pure
-                        internal
-                        returns(bytes32) 
-    {
-        return keccak256(abi.encodePacked(airline, flight, timestamp));
-    }
 
 
 
