@@ -62,7 +62,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
       });
 
       it("cannot set a flight status", async () => {
-        let timestamp = new Date().getTime();
+        let timestamp =  Math.floor(Date.now() / 1000); 
         let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
         await expectRevert(
           this.flightSuretyData.setFlightStatus(policy,timestamp,2),
@@ -72,7 +72,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
 
       it("cannot buy insurance", async () => {
         let flight =  web3.utils.keccak256("UA256")
-        let timestamp = new Date().getTime();
+        let timestamp =  Math.floor(Date.now() / 1000); 
         let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
         await expectRevert(
           this.flightSuretyData.buy(
@@ -91,7 +91,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
 
       it("cannot credit insurees", async () => {
         let flight =  web3.utils.keccak256("UA256")
-        let timestamp = new Date().getTime();
+        let timestamp =  Math.floor(Date.now() / 1000); 
         let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
         await expectRevert(
           this.flightSuretyData.creditInsurees(policy,2,2),
@@ -136,7 +136,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
     });
 
     it("cannot set a flight status", async () => {
-      let timestamp = new Date().getTime();
+      let timestamp =  Math.floor(Date.now() / 1000); 
       let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
       await expectRevert(
         this.flightSuretyData.setFlightStatus(policy,timestamp,2),
@@ -146,7 +146,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
 
     it("cannot buy insurance", async () => {
       let flight =  web3.utils.keccak256("UA256")
-      let timestamp = new Date().getTime();
+      let timestamp =  Math.floor(Date.now() / 1000); 
       let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
       await expectRevert(
         this.flightSuretyData.buy(
@@ -165,7 +165,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
 
     it("cannot credit insurees", async () => {
       let flight =  web3.utils.keccak256("UA256")
-      let timestamp = new Date().getTime();
+      let timestamp =  Math.floor(Date.now() / 1000); 
       let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
       await expectRevert(
         this.flightSuretyData.creditInsurees(policy,2,2),
@@ -218,7 +218,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
       });
 
       it("can buy flight insurance", async () => {
-        let timestamp = new Date().getTime();
+        let timestamp =  Math.floor(Date.now() / 1000); 
         let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
         let tx = await this.flightSuretyData.buy(this.accounts[2],policy,flight,timestamp,
           {
@@ -259,7 +259,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
   
     it("cannot buy insurance on an unregistered flight",async () => {
       let flight =  web3.utils.keccak256("UA256")
-      let timestamp = new Date().getTime();
+      let timestamp =  Math.floor(Date.now() / 1000); 
       let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
       await expectRevert(
         this.flightSuretyData.buy(this.accounts[2],policy,flight,timestamp),
@@ -270,7 +270,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
 
     describe("set/get flight status",async () => {
       let flight =  web3.utils.keccak256("UA256")
-      let timestamp = new Date().getTime();
+      let timestamp =  Math.floor(Date.now() / 1000); 
       let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
       beforeEach(async () => {
         await this.flightSuretyData.registerFlight( this.accounts[1], "UA256", flight);
@@ -282,7 +282,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
       });
 
       it("cannot set flight status on a non existent policy", async () => {
-        let timestamp = new Date().getTime();
+        let timestamp =  Math.floor(Date.now() / 1000); 
         let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
         await expectRevert(
           this.flightSuretyData.setFlightStatus(policy,timestamp,2),
@@ -318,7 +318,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
 
     describe("credit/pay", async () => {
       let flight =  web3.utils.keccak256("UA256")
-      let timestamp = new Date().getTime();
+      let timestamp =  Math.floor(Date.now() / 1000); 
       let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
       let balance2,balance3; 
       let price =  web3.utils.toWei("1","ether");
