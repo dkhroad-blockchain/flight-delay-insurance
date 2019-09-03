@@ -269,7 +269,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
      *  @dev Transfers eligible payout funds to insuree
      *
     */
-    function pay() external payable whenNotPaused {
+    function pay() external payable whenNotPaused fromAuthorized {
         require(msg.sender == tx.origin,"Only EOAs can receive payout.");
         uint256 balance = creditBalances[msg.sender];
         require(balance > 0,"No payout balance.");
@@ -287,6 +287,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
                             external
                             payable
                             whenNotPaused
+                            fromAuthorized
                             returns(uint256)
     {
         require(msg.value > 0,"Must use ether to fund");

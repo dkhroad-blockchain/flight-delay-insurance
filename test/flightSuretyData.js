@@ -39,26 +39,109 @@ contract('Flight Surety Data Tests', async (accounts) => {
       expectEvent.inLogs(logs,"Paused",{ account: this.accounts[1]});
     });
 
-    it("blocks access to functions using whenNotPaused() modifier when the contract is paused", async () => {
-      await this.flightSuretyData.pause({from: this.accounts[1]});
+    describe("when paused", async () => {
+      beforeEach(async () => {
+        await this.flightSuretyData.pause()
+      });
+
+      it("cannot register an airline", async () => {
         await expectRevert(
           this.flightSuretyData.registerAirline(this.accounts[1],"Delta"),
           "Pausable: paused"
         );
+      });
 
+      it("cannot register a flight", async () => {
+        await expectRevert(
+          this.flightSuretyData.registerFlight(
+            this.accounts[1],
+            "UA256",
+            web3.utils.keccak256("UA256")),
+          "Pausable: paused"
+        );
+      });
+
+      it("cannot set a flight status", async () => {
+        let timestamp = new Date().getTime();
+        let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
+        await expectRevert(
+          this.flightSuretyData.setFlightStatus(policy,timestamp,2),
+          "Pausable: paused"
+        );
+      });
+
+      it("cannot buy insurance", async () => {
+        let flight =  web3.utils.keccak256("UA256")
+        let timestamp = new Date().getTime();
+        let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
+        await expectRevert(
+          this.flightSuretyData.buy(
+            this.accounts[2],
+            policy,
+            flight,
+            timestamp,
+            {
+              value: web3.utils.toWei("1","ether"),
+              from: this.accounts[2]
+            }
+          ),
+          "Pausable: paused"
+        );
+      });
+
+      it("cannot credit insurees", async () => {
+        let flight =  web3.utils.keccak256("UA256")
+        let timestamp = new Date().getTime();
+        let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
+        await expectRevert(
+          this.flightSuretyData.creditInsurees(policy,2,2),
+          "Pausable: paused"
+        );
+      })
+
+      it("cannot pay insurees", async () => {
+        await expectRevert(
+          this.flightSuretyData.pay({from: this.accounts[2]}),
+          "Pausable: paused"
+        );
+      });
+
+      it("cannot fund the contract", async () => {
+        await expectRevert(
+          this.flightSuretyData.fund(this.accounts[2],{from: this.accounts[2]}),
+          "Pausable: paused"
+        );
+
+      });
     });
-
   });
 
-  describe("when not authorized", async () => {
-    it("cannot register a flight", async () => {
 
+  describe("when not authorized", async () => {
+    it("cannot register an airline", async () => {
+      await expectRevert(
+        this.flightSuretyData.registerAirline(this.accounts[1],"Delta Airlines"),
+        "Calling contract is not authorized"
+      );
+    });
+
+    it("cannot register a flight", async () => {
       await expectRevert(
         this.flightSuretyData.registerFlight(
         this.accounts[1],
         "UA256",
           web3.utils.keccak256("UA256")),
-        "Calling contract is not authorized");
+        "Calling contract is not authorized"
+      );
+    });
+
+    it("cannot set a flight status", async () => {
+      let timestamp = new Date().getTime();
+      let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
+      await expectRevert(
+        this.flightSuretyData.setFlightStatus(policy,timestamp,2),
+        "Calling contract is not authorized"
+      );
     });
 
     it("cannot buy insurance", async () => {
@@ -79,6 +162,31 @@ contract('Flight Surety Data Tests', async (accounts) => {
         "Calling contract is not authorized"
       );
     });
+
+    it("cannot credit insurees", async () => {
+      let flight =  web3.utils.keccak256("UA256")
+      let timestamp = new Date().getTime();
+      let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
+      await expectRevert(
+        this.flightSuretyData.creditInsurees(policy,2,2),
+        "Calling contract is not authorized"
+      );
+    })
+
+    it("cannot pay insurees", async () => {
+      await expectRevert(
+        this.flightSuretyData.pay({from: this.accounts[2]}),
+        "Calling contract is not authorized"
+      );
+    });
+
+    it("cannot fund the contract", async () => {
+      await expectRevert(
+        this.flightSuretyData.fund(this.accounts[2],{from: this.accounts[2]}),
+        "Calling contract is not authorized"
+      );
+
+    });
   });
 
   describe("when authorized", async () => {
@@ -87,6 +195,11 @@ contract('Flight Surety Data Tests', async (accounts) => {
       this.flightSuretyData.authorizeContract(this.accounts[1]);
       this.flightSuretyData.authorizeContract(this.accounts[2]);
       this.flightSuretyData.authorizeContract(this.accounts[3]);
+    });
+
+    it("can register an airline", async () => {
+      let tx = await this.flightSuretyData.registerAirline(this.accounts[1],"Delta Airlines");
+      expectEvent.inLogs(tx.logs,"AirlineRegistered",{name: "Delta Airlines",by: this.accounts[0]});
     });
 
 

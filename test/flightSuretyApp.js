@@ -153,8 +153,8 @@ contract('Flight Surety App Tests', async (accounts) => {
         });
       });
 
-      describe('when not registered', async() => {
-        it("cannot register an airline",async () => {
+      describe('when an airline is not registered', async() => {
+        it("cannot register an another airline",async () => {
           let newAirline1 = this.accounts[8];
           let newAirline2 = this.accounts[9];
           await expectRevert(
