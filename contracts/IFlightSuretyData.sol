@@ -22,7 +22,7 @@ contract IFlightSuretyData {
     event FlightStatusUpdated(uint256 policy,uint256 indexed flight,FlightStatus indexed status, uint256 timestamp);
     event FlightRegistered(address indexed airline,uint256 indexed flight,string name);
     event InsuranceCredit(address indexed customer,uint256 payout,uint256 policy);
-    event Payout(address indexed customer,uint256 ammount);
+    event Payout(address indexed customer,uint256 amount);
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */

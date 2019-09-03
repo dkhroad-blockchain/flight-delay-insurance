@@ -164,7 +164,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
         await this.flightSuretyData.buy(this.accounts[3],policy,flight,timestamp,
           {
             value: web3.utils.toWei("1","ether"),
-            from: this.accounts[2]
+            from: this.accounts[3]
           });
       });
 
@@ -200,11 +200,76 @@ contract('Flight Surety Data Tests', async (accounts) => {
           this.flightSuretyData.setFlightStatus(policy,timestamp,0),
           "Expired policy."
         );
-        
       });
-
     });
 
+    describe("credit/pay", async () => {
+      let flight =  web3.utils.keccak256("UA256")
+      let timestamp = new Date().getTime();
+      let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
+      let balance2,balance3; 
+      let price =  web3.utils.toWei("1","ether");
+      let payout = web3.utils.toWei("2","ether");
+      beforeEach(async () => {
+        await this.flightSuretyData.registerFlight( this.accounts[1], "UA256", flight);
+        await this.flightSuretyData.buy(
+          this.accounts[3],
+          policy,
+          flight,
+          timestamp,
+          {
+            value: price,
+            from: this.accounts[3]
+          });
+        await this.flightSuretyData.buy(
+          this.accounts[2],
+          policy,
+          flight,
+          timestamp,
+          {
+            value: price,
+            from: this.accounts[2]
+          });
+        let tx = await this.flightSuretyData.setFlightStatus(policy,timestamp,2);
+        this.flightSuretyData.sendTransaction({value: web3.utils.toWei("5","ether"), from: this.accounts[8]});
+      });
+
+      it("can credit insureees",async () => {
+        tx = await this.flightSuretyData.creditInsurees(policy,2,2);
+        expectEvent.inLogs(tx.logs,"InsuranceCredit",{customer: this.accounts[2],payout: payout});
+        expectEvent.inLogs(tx.logs,"InsuranceCredit",{customer: this.accounts[3],payout: payout});
+      });
+
+      
+
+      it("can pay customers who bought insurance", async () => {
+        let weiToBN = async (acc) => {
+          return web3.utils.toBN(await web3.eth.getBalance(acc));
+        }
+
+        let toEther = (bn) => {
+          return Math.round(web3.utils.fromWei(bn.toString(),"ether"));
+        }
+
+        let contractBalance = await web3.eth.getBalance(this.flightSuretyData.address);
+        console.log("contract balance: ",web3.utils.fromWei(contractBalance,"ether"));
+
+        await this.flightSuretyData.creditInsurees(policy,2,2);
+        let balanceBefore2 = await weiToBN(this.accounts[2]); 
+        let balanceBefore3 = await weiToBN(this.accounts[3]); 
+
+        let tx = await this.flightSuretyData.pay({from: this.accounts[2]});
+        expectEvent.inLogs(tx.logs,"Payout",{customer: accounts[2], amount: payout});
+        let balanceAfter2 = await weiToBN(this.accounts[2]); 
+        assert.equal(toEther(balanceAfter2-balanceBefore2),2);
+
+        tx = await this.flightSuretyData.pay({from: this.accounts[3]});
+        expectEvent.inLogs(tx.logs,"Payout",{customer: accounts[3], amount: payout});
+        let balanceAfter3 = await weiToBN(this.accounts[3]); 
+        assert.equal(toEther(balanceAfter3-balanceBefore3),2);
+
+      });
+    });
   });
 
 });

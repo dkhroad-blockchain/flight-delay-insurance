@@ -87,6 +87,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         _;
     }
 
+
     modifier validFlight(uint256 key) {
         require(flights[key].isRegistered,"Unregistered flight.");
         _;
@@ -237,9 +238,9 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
      *  @param status flight status for which a payout should occur
      *  @param times  payout multiple for the original ammount.
      *                Calling (App) contract is responsible for providing the sanitized value.
-     *                By keeping this logic in the app contract, we won't have to update/migrate
+     *                By keeping this logic in the app contract, we wont have to update/migrate
      *                to a new data contract if payout logic changes.
-    */
+     */
     function creditInsurees(
         uint256 policyKey,
         FlightStatus status,
@@ -250,10 +251,13 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         fromAuthorized 
     {
         Policy memory policy = policies[policyKey];
+        require(policy.statusCode != FlightStatus.STATUS_CODE_UNKNOWN,"Cannot credit on existing insurance");
         require(policy.statusCode == status,"Unexpected policy state");
         Insurance[] memory insuree = policy.insuree;
         for (uint256 i; i< insuree.length; i++) {
-            uint256 payout = insuree[i].price.mul(times);
+            uint256 price = insuree[i].price;
+            policies[policyKey].insuree[i].price = 0; // to avoid crediting multiple times, 
+            uint256 payout = price.mul(times);
             address thisCustomer = insuree[i].customer;
             creditBalances[thisCustomer] = creditBalances[thisCustomer].add(payout);
             emit InsuranceCredit(thisCustomer,payout,policyKey);
@@ -282,6 +286,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     function fund(address airline)
                             external
                             payable
+                            whenNotPaused
                             returns(uint256)
     {
         require(msg.value > 0,"Must use ether to fund");
@@ -297,7 +302,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     * @dev Fallback function for funding smart contract.
     *
     */
-    function() external payable {
+    function() external payable whenNotPaused {
         require(msg.data.length == 0,"payload not allowed");
     }
 
