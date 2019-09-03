@@ -39,6 +39,11 @@ To build dapp for prod:
 
 Deploy the contents of the ./dapp folder
 
+## Improvements 
+
+* Move Multi Signature logic into a separate wallet contact and make it more generic.
+* Move Oracle functionality to Rhombus
+
 
 ## Resources
 
