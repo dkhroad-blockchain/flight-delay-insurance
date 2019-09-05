@@ -26,8 +26,6 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         address airline;
         string name;
     }
-
-    
     mapping(uint256 => Flight) private flights;
 
     struct Insurance {
@@ -210,6 +208,9 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         emit PolicyPurchased(customer,policyKey,policy.flight,timestamp);
     }
 
+    /** 
+      * @dev setFlightStatus 
+      */
     function setFlightStatus(
         uint256 policyKey,
         FlightStatus statusCode
@@ -232,6 +233,9 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         );
     }
 
+    /** 
+      * @dev getFlightStatus 
+      */
     function getFlightStatus(uint256 policyKey)
         external
         whenNotPaused 
@@ -303,8 +307,6 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         emit AirlineFunded(airline,airlines[airline].balance);
         return airlines[airline].balance;
     }
-
-
 
 
     /**

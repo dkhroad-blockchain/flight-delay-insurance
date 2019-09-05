@@ -14,6 +14,9 @@ contract('Oracles', async (accounts) => {
   const STATUS_CODE_LATE_TECHNICAL = 4;
   const STATUS_CODE_LATE_OTHER = 5;
 
+  let flight = 'ND1309';
+  let timestamp = Math.floor(Date.now() / 1000);
+
   before('setup contract', async () => {
     this.accounts = accounts;
     this.flightSuretyData = await FlightSuretyData.new();
@@ -40,8 +43,6 @@ contract('Oracles', async (accounts) => {
 
 
   it('can request flight status',async () => {
-    let flight = 'ND1309';
-    let timestamp = Math.floor(Date.now() / 1000);
     let tx = await this.flightSuretyOracle.fetchFlightStatus(this.firstAirline, flight, timestamp);
     expectEvent.inLogs(tx.logs,'OracleRequest',{airline: this.firstAirline, flight: flight});
   });
@@ -89,7 +90,7 @@ contract('Oracles', async (accounts) => {
     });
 
     it("processes flight status",async () => {
-      let flight = 'UA256';
+      let flight = 'AA124';
       let timestamp = Math.floor(Date.now() / 1000);
 
       let tx = await this.flightSuretyOracle.registerFlight(this.accounts[0],flight);
