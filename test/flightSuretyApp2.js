@@ -74,7 +74,7 @@ contract('Flight Surety App flight Tests', async (accounts) => {
           );
         });
 
-        it('can pay funds to insurees', async () => {
+        it('can credit funds to insurees', async () => {
           let ts = Math.floor(Date.now()/1000);
           let flight = "DL123"
           let tx = await this.flightSuretyApp.registerFlight(this.accounts[1],flight, {from: this.accounts[1]});
@@ -87,11 +87,6 @@ contract('Flight Surety App flight Tests', async (accounts) => {
               status: web3.utils.toBN(STATUS_CODE_LATE_AIRLINE)
             }
           );
-          // InsuranceCredit(customer: <indexed>
-          // 0xF249c40872b28e8DBbf14E0EeFFcDb5f6179fA62 (address), payout:
-          // 1500000000000000000 (uint256), policy:
-          // 101076496914782058276898274381385962502745738443115232686145715330365416574418
-          // (uint256))
           expectEvent.inLogs(
             tx.logs,
             "InsuranceCredit",
@@ -101,10 +96,27 @@ contract('Flight Surety App flight Tests', async (accounts) => {
             }
           );
 
-
         });
 
+        it('can pay accredited customers',async () => {
+          let weiToBN = async (acc) =>  {
+            return await web3.utils.toBN(await web3.eth.getBalance(acc));
+          }
+          let toEther =  (bn) => {
+            return web3.utils.fromWei(bn,"ether");
+          }
+          let bb =  await weiToBN(this.accounts[2]);
+          let tx = await this.flightSuretyApp.pay({from: accounts[2]});
+          console.log(tx.logs);
+          // Payout(customer: <indexed>
+          // 0x1b584Ee6Ca0ffAe7CbFEb7E02F247CF78C56F648 (address), amount:
+          // 1500000000000000000 (uint256))
+          expectEvent.inLogs(tx.logs,"Payout",{customer: accounts[2],amount: web3.utils.toWei("1.5","ether") });
+          let ba = await weiToBN(this.accounts[2]);
+          let payOut = toEther(ba) - toEther(bb)
+          assert.equal(payOut.toFixed(1),1.5);
 
+        });
       });
     });
 
@@ -116,6 +128,8 @@ contract('Flight Surety App flight Tests', async (accounts) => {
         it('can not credit insuree', async () => {
         });
         it('can not pay funds to insurees', async () => {
+          let tx = this.flightSuretyApp.pay({from: accounts[3]});
+          await expectRevert(tx,"No payout balance.");
         });
     })
 

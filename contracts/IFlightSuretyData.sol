@@ -61,7 +61,7 @@ contract IFlightSuretyData {
     /**
      *  @dev Credits payouts to insurees
     */
-    function creditInsurees(uint256 policy,FlightStatus staus,uint256 numerator, uint256 denominator) external;
+    function creditInsurees(uint256 policy,FlightStatus staus,uint256 multiple) external;
     
 
     /**

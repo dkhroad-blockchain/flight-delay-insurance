@@ -25,11 +25,7 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
 
     uint256 private airlineMinimumFundsRequirement = 10 ether;
 
-    struct PayOutTerms {
-        uint256 numerator;
-        uint256 denominator;
-    }
-    mapping(uint256 => PayOutTerms) private payOut;
+    mapping(uint256 => uint256) private payOutParams;
 
 
     uint256 public constant REGISTER_AIRLINE = 1;// transaction id for multi sig consesus 
@@ -38,16 +34,19 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
     /********************************************************************************************/
     /*                                       EVENTS                                             */
     /********************************************************************************************/
+    /* events forwarded from the data contract */
     event AirlineRegistered(address indexed airline, string name, address indexed by);
     event AirlineFunded(address indexed airline,uint256 value);
     event PolicyPurchased(address indexed customer, uint256 indexed policy, uint256 flight, uint256 timestamp);
     event FlightStatusUpdated(address indexed airline,string flight,IFlightSuretyData.FlightStatus status,uint256 policy);
     event FlightRegistered(address indexed airline,uint256 indexed flight,string name);
+    event Payout(address indexed customer,uint256 amount);
+    event InsuranceCredit(address indexed customer,uint256 payout,uint256 policy);
 
+   /* events generated in the app contract */
     event AirlineNotFunded(address indexed airline,uint256 value);
     event NotRegistered(address indexed airline);
     event PayOutTermsSet(uint256 indexed status,uint256 numerator,uint256 denominator);
-    event InsuranceCredit(address indexed customer,uint256 payout,uint256 policy);
  
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
@@ -108,9 +107,7 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
         renounceSigner();
         // default payout 1.5 times if a flight is late due to airline's fault
         _setPayOutParams(
-            uint256(IFlightSuretyData.FlightStatus.STATUS_CODE_LATE_AIRLINE),
-            15,
-            10
+            uint256(IFlightSuretyData.FlightStatus.STATUS_CODE_LATE_AIRLINE), 150
         );
 
     }
@@ -312,12 +309,11 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
     function _setFlightStatus(uint256 policy,uint256 status) internal {
         IFlightSuretyData.FlightStatus flightStatus = IFlightSuretyData.FlightStatus(status);
         flightSuretyDataContract.setFlightStatus(policy,flightStatus);
-        if (payOut[status].numerator != 0)  {
+        if (payOutParams[status] != 0)  {
             flightSuretyDataContract.creditInsurees(
                 policy,
                 flightStatus,
-                payOut[status].numerator,
-                payOut[status].denominator
+                payOutParams[status]
             );
         }
     }
@@ -338,21 +334,19 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
 
     function setPayOutParams(
         uint256 status, 
-        uint256 numerator,
-        uint256 denominator
+        uint256 payOutMultiple
     ) 
         external
         whenNotPaused
         onlyWhitelistAdmin
         validFlightStatus(status)
     {
-        _setPayOutParams(status,numerator,denominator);
+        _setPayOutParams(status,payOutMultiple);
     }
 
-    function _setPayOutParams(uint256 status, uint256 numerator, uint256 denominator) internal {
-        payOut[status].numerator = numerator;
-        payOut[status].denominator = denominator;
-        emit PayOutTermsSet(status,numerator,denominator);
+    function _setPayOutParams(uint256 status, uint256 payOutMultiple) internal {
+        payOutParams[status] = payOutMultiple;
+        emit PayOutTermsSet(status,payOutParams[status],100);
 
     }
 

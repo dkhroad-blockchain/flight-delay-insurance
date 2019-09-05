@@ -244,8 +244,8 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     /**
      *  @dev Credits payouts to insurees
      *  @param status flight status for which a payout should occur
-     *  @param numerator    payout multiple numerator for the original ammount.
-     *  @param denominator  payout multiple denominator for the original ammount.
+     *  @param multiple payout multiple (in hundereds) for the original ammount.
+     *                         for example, for 1.5, the multiple should be 150     
      *                Calling (App) contract is responsible for providing the sanitized value.
      *                By keeping this logic in the app contract, we wont have to update/migrate
      *                to a new data contract if payout logic changes.
@@ -253,8 +253,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     function creditInsurees(
         uint256 policyKey,
         FlightStatus status,
-        uint256 numerator,
-        uint256 denominator
+        uint256 multiple
     )
         external
         whenNotPaused 
@@ -267,7 +266,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         for (uint256 i; i< insuree.length; i++) {
             uint256 price = insuree[i].price;
             policies[policyKey].insuree[i].price = 0; // to avoid crediting multiple times, 
-            uint256 payout = price.mul(numerator).div(denominator);
+            uint256 payout = price.mul(multiple).div(100);
             address thisCustomer = insuree[i].customer;
             creditBalances[thisCustomer] = creditBalances[thisCustomer].add(payout);
             emit InsuranceCredit(thisCustomer,payout,policyKey);
