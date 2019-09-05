@@ -51,6 +51,10 @@ contract FlightSuretyOracle is Pausable, WhitelistAdminRole {
     // they fetch data and submit a response
     event OracleRequest(uint8 index, address airline, string flight, uint256 timestamp);
 
+    modifier onlyRegisteredOracle() {
+        require(oracles[msg.sender].isRegistered,"Oracle must be registered");
+        _;
+    }
 
     // abstract function to be implemented by the derieved contract
     function processFlightStatus(
@@ -105,6 +109,8 @@ contract FlightSuretyOracle is Pausable, WhitelistAdminRole {
         emit OracleRequest(index, airline, flight, timestamp);
     } 
 
+
+
     // Called by oracle when a response is available to an outstanding request
     // For the response to be accepted, there must be a pending request that is open
     // and matches one of the three Indexes randomly assigned to the oracle at the
@@ -118,8 +124,8 @@ contract FlightSuretyOracle is Pausable, WhitelistAdminRole {
     )
         external
         whenNotPaused
+        onlyRegisteredOracle
     {
-        emit SubmitOracleResponse(index,airline, flight, timestamp, statusCode);
         require(
             (oracles[msg.sender].indexes[0] == index) || 
             (oracles[msg.sender].indexes[1] == index) || 
@@ -129,9 +135,6 @@ contract FlightSuretyOracle is Pausable, WhitelistAdminRole {
 
 
         bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp)); 
-        // if (!oracleResponses[key].isOpen) {
-        //     return;
-        // }
         require(oracleResponses[key].isOpen, "Flight or timestamp do not match oracle request");
 
         oracleResponses[key].responses[statusCode].push(msg.sender);

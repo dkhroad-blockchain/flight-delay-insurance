@@ -114,6 +114,10 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         return airlines[caller].isRegistered;
     }
 
+    function isOperational() external view fromAuthorized returns(bool) {
+        return paused();
+    }
+
    /**
     * @dev Add an airline to the registration queue
     *      Can only be called from FlightSuretyApp contract
@@ -208,7 +212,6 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
 
     function setFlightStatus(
         uint256 policyKey,
-        uint256 timestamp,
         FlightStatus statusCode
     ) 
         external
@@ -217,11 +220,16 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         validPolicy(policyKey)
     {
         policies[policyKey].statusCode = statusCode;
-        policies[policyKey].actualTimestamp = timestamp;
        
         Policy memory policy = policies[policyKey];
+        Flight memory flightInfo = flights[policy.flight];
         
-        emit FlightStatusUpdated(policyKey,policy.flight,policy.statusCode,policy.actualTimestamp);
+        emit FlightStatusUpdated(
+            flightInfo.airline,
+            flightInfo.name,
+            policy.statusCode,
+            policyKey
+        );
     }
 
     function getFlightStatus(uint256 policyKey)
@@ -236,7 +244,8 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     /**
      *  @dev Credits payouts to insurees
      *  @param status flight status for which a payout should occur
-     *  @param times  payout multiple for the original ammount.
+     *  @param numerator    payout multiple numerator for the original ammount.
+     *  @param denominator  payout multiple denominator for the original ammount.
      *                Calling (App) contract is responsible for providing the sanitized value.
      *                By keeping this logic in the app contract, we wont have to update/migrate
      *                to a new data contract if payout logic changes.
@@ -244,7 +253,8 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     function creditInsurees(
         uint256 policyKey,
         FlightStatus status,
-        uint256 times
+        uint256 numerator,
+        uint256 denominator
     )
         external
         whenNotPaused 
@@ -257,7 +267,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         for (uint256 i; i< insuree.length; i++) {
             uint256 price = insuree[i].price;
             policies[policyKey].insuree[i].price = 0; // to avoid crediting multiple times, 
-            uint256 payout = price.mul(times);
+            uint256 payout = price.mul(numerator).div(denominator);
             address thisCustomer = insuree[i].customer;
             creditBalances[thisCustomer] = creditBalances[thisCustomer].add(payout);
             emit InsuranceCredit(thisCustomer,payout,policyKey);
@@ -269,13 +279,12 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
      *  @dev Transfers eligible payout funds to insuree
      *
     */
-    function pay() external payable whenNotPaused fromAuthorized {
-        require(msg.sender == tx.origin,"Only EOAs can receive payout.");
-        uint256 balance = creditBalances[msg.sender];
+    function pay(address payable customer) external payable whenNotPaused fromAuthorized {
+        uint256 balance = creditBalances[customer];
         require(balance > 0,"No payout balance.");
-        creditBalances[msg.sender] = 0;
-        msg.sender.transfer(balance);
-        emit Payout(msg.sender,balance);
+        creditBalances[customer] = 0;
+        customer.transfer(balance);
+        emit Payout(customer,balance);
     }
 
    /**

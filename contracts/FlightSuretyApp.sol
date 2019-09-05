@@ -25,7 +25,15 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
 
     uint256 private airlineMinimumFundsRequirement = 10 ether;
 
-    uint256 public constant REGISTER_AIRLINE = 1;// for transaction id for multi sig consesus 
+    struct PayOutTerms {
+        uint256 numerator;
+        uint256 denominator;
+    }
+    mapping(uint256 => PayOutTerms) private payOut;
+
+
+    uint256 public constant REGISTER_AIRLINE = 1;// transaction id for multi sig consesus 
+    uint256 public constant SET_FLIGHT_STATUS = 2;// transaction id for multi sig consesus 
 
     /********************************************************************************************/
     /*                                       EVENTS                                             */
@@ -33,11 +41,13 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
     event AirlineRegistered(address indexed airline, string name, address indexed by);
     event AirlineFunded(address indexed airline,uint256 value);
     event PolicyPurchased(address indexed customer, uint256 indexed policy, uint256 flight, uint256 timestamp);
-    event FlightStatusUpdated(uint256 indexed flight,uint256 indexed status, uint256 timestamp);
+    event FlightStatusUpdated(address indexed airline,string flight,IFlightSuretyData.FlightStatus status,uint256 policy);
     event FlightRegistered(address indexed airline,uint256 indexed flight,string name);
 
     event AirlineNotFunded(address indexed airline,uint256 value);
     event NotRegistered(address indexed airline);
+    event PayOutTermsSet(uint256 indexed status,uint256 numerator,uint256 denominator);
+    event InsuranceCredit(address indexed customer,uint256 payout,uint256 policy);
  
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
@@ -63,6 +73,19 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
         _;
     }
 
+    modifier validFlightStatus(uint256 status) {
+        IFlightSuretyData.FlightStatus flightStatus = IFlightSuretyData.FlightStatus(status);
+        require(
+            flightStatus == IFlightSuretyData.FlightStatus.STATUS_CODE_ON_TIME ||
+            flightStatus == IFlightSuretyData.FlightStatus.STATUS_CODE_LATE_AIRLINE ||
+            flightStatus == IFlightSuretyData.FlightStatus.STATUS_CODE_LATE_WEATHER ||
+            flightStatus == IFlightSuretyData.FlightStatus.STATUS_CODE_LATE_TECHNICAL ||
+            flightStatus == IFlightSuretyData.FlightStatus.STATUS_CODE_LATE_OTHER,
+            "Invalid flight status"
+        );
+        _;
+    }
+
     function _isFunded() internal returns(bool) {
         uint256 balance = flightSuretyDataContract.getAirlineBalance(msg.sender);
         return balance >= airlineMinimumFundsRequirement;
@@ -83,6 +106,13 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
         // be a signer (to be able to take part in the multi-party consesus,
         // we must remove the deployer from a SignerRole.
         renounceSigner();
+        // default payout 1.5 times if a flight is late due to airline's fault
+        _setPayOutParams(
+            uint256(IFlightSuretyData.FlightStatus.STATUS_CODE_LATE_AIRLINE),
+            15,
+            10
+        );
+
     }
 
     /********************************************************************************************/
@@ -91,10 +121,10 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
 
     function isDataContactOperational() 
                             public 
-                            pure 
+                            view 
                             returns(bool) 
     {
-        return true;  // Modify to call data contract's status
+        return flightSuretyDataContract.isOperational();  
     }
 
     /********************************************************************************************/
@@ -193,7 +223,6 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
     }
 
     function buy(
-        address customer,
         string calldata flight,
         uint256 timestamp
     )
@@ -202,15 +231,26 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
         whenNotPaused
     {
         //TODO: make max price configurable.
-        require(msg.value <= 1 ether,"Max. allowable insurace price is 1 ether"); 
+        require(msg.value <= 1 ether,"Max allowable insurance price exceeded"); 
         uint256 flightKey = getFlightKey(flight);
         address airline = flightSuretyDataContract.getAirline(flightKey);
         require(airline != address(0x0),"Unregistered flight");
+        require(airline != msg.sender,"Cannot buy insurance on your own flight");
+        address customer = msg.sender;
 
         uint256 policyKey = getPolicyKey(airline,flight,timestamp);
-        flightSuretyDataContract.buy(customer,policyKey,flightKey,timestamp);
+        flightSuretyDataContract.buy.value(msg.value)(customer,policyKey,flightKey,timestamp);
     }
 
+
+    /**
+     *  @dev Transfers eligible payout funds to insuree
+     *
+    */
+    function pay() external payable whenNotPaused {
+        require(msg.sender == tx.origin,"Only EOAs can receive payout.");
+        flightSuretyDataContract.pay(msg.sender);
+    }
 
     function getFlightKey(string memory flight) pure internal returns(uint256) {
         return uint256(keccak256(abi.encodePacked(flight)));
@@ -231,6 +271,8 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
     * @dev Called after oracle has updated flight status
     *
     */  
+
+
     function processFlightStatus(
         address airline,
         string memory flight,
@@ -238,20 +280,82 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
         uint256 statusCode
     ) 
         internal
+        validFlightStatus(statusCode)
     {
         uint256 policyKey = getPolicyKey(airline,flight,timestamp);
-        flightSuretyDataContract.setFlightStatus(policyKey,timestamp,IFlightSuretyData.FlightStatus(statusCode));
+        _setFlightStatus(policyKey,statusCode);
     }
+
+    /**
+      * @dev the only difference between this function and the 
+      *      processFlightStatus is that this method can be called by 
+      *      the airline to override flight status or in lieu of oracle responses if needed.
+      *      Requires same multi-party consensus as registering airlines
+      */
+
+    function setFlightStatus(
+        address airline,
+        string calldata flight,
+        uint256 timestamp,
+        uint256 statusCode
+    ) 
+        external 
+        whenNotPaused 
+        validFlightStatus(statusCode)
+        onlyConfirmed(SET_FLIGHT_STATUS)
+    {
+        uint256 policyKey = getPolicyKey(airline,flight,timestamp);
+        _setFlightStatus(policyKey,statusCode);
+    }
+
+
+    function _setFlightStatus(uint256 policy,uint256 status) internal {
+        IFlightSuretyData.FlightStatus flightStatus = IFlightSuretyData.FlightStatus(status);
+        flightSuretyDataContract.setFlightStatus(policy,flightStatus);
+        if (payOut[status].numerator != 0)  {
+            flightSuretyDataContract.creditInsurees(
+                policy,
+                flightStatus,
+                payOut[status].numerator,
+                payOut[status].denominator
+            );
+        }
+    }
+
+
 
 
 
     /**
       * @dev sets the minimum amount funds required to take part in the 
-      * contract. 
+      * contract.
+      * TODO: make it require multi-party consensus
       */
-    function setAirlineMinimumFunds(uint256 minFund) external onlyWhitelistAdmin  {
+    function setAirlineMinimumFunds(uint256 minFund) external whenNotPaused onlyWhitelistAdmin  {
         airlineMinimumFundsRequirement = minFund;
     }
+
+
+    function setPayOutParams(
+        uint256 status, 
+        uint256 numerator,
+        uint256 denominator
+    ) 
+        external
+        whenNotPaused
+        onlyWhitelistAdmin
+        validFlightStatus(status)
+    {
+        _setPayOutParams(status,numerator,denominator);
+    }
+
+    function _setPayOutParams(uint256 status, uint256 numerator, uint256 denominator) internal {
+        payOut[status].numerator = numerator;
+        payOut[status].denominator = denominator;
+        emit PayOutTermsSet(status,numerator,denominator);
+
+    }
+
 
     /**
     * @dev Fallback function for funding smart contract.

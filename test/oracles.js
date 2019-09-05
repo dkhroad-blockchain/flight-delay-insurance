@@ -1,6 +1,7 @@
 const {BN, constants, expectEvent, expectRevert } = require('openzeppelin-test-helpers');
 
-const FlightSuretyOracle = artifacts.require('FlightSuretyOracleMock');
+const FlightSuretyApp = artifacts.require('FlightSuretyApp');
+const FlightSuretyData = artifacts.require('FlightSuretyData');
 
 contract('Oracles', async (accounts) => {
 
@@ -15,8 +16,12 @@ contract('Oracles', async (accounts) => {
 
   before('setup contract', async () => {
     this.accounts = accounts;
-    this.flightSuretyOracle = await FlightSuretyOracle.new();
-    this.firstAirline = accounts[1];
+    this.flightSuretyData = await FlightSuretyData.new();
+    this.flightSuretyOracle = await FlightSuretyApp.new(this.flightSuretyData.address);
+    this.firstAirline = accounts[0];
+    await this.flightSuretyOracle.setAirlineMinimumFunds(web3.utils.toWei("2","ether"));
+    await this.flightSuretyData.authorizeContract(this.flightSuretyOracle.address);
+    await this.flightSuretyOracle.bootstrap("A0",{value: web3.utils.toWei("2","ether")});
   });
 
 
@@ -86,10 +91,25 @@ contract('Oracles', async (accounts) => {
     it("processes flight status",async () => {
       let flight = 'UA256';
       let timestamp = Math.floor(Date.now() / 1000);
-      let tx = await this.flightSuretyOracle.fetchFlightStatus(this.firstAirline, flight, timestamp);
+
+      let tx = await this.flightSuretyOracle.registerFlight(this.accounts[0],flight);
+      expectEvent.inLogs(tx.logs,"FlightRegistered",{airline: this.accounts[0],name: flight});
+
+      tx = await this.flightSuretyOracle.buy(
+        flight,
+        timestamp,
+        {
+          from: this.accounts[2], 
+          value: web3.utils.toWei("1","ether")
+        }
+      );
+      expectEvent.inLogs(tx.logs,"PolicyPurchased",{customer: this.accounts[2]});
+
+      tx = await this.flightSuretyOracle.fetchFlightStatus(this.firstAirline, flight, timestamp);
       let requestedIndex = tx.logs[0].args.index;
       let goodOracle;
       let goodIndex;
+
       for(let a=1; a<TEST_ORACLES_COUNT; a++) {
         let oracleIndexes = await this.flightSuretyOracle.getMyIndexes.call({ from: accounts[a]});
         for(let idx=0;idx<3;idx++) {
@@ -123,7 +143,7 @@ contract('Oracles', async (accounts) => {
           status: web3.utils.toBN(STATUS_CODE_ON_TIME)
         }
       );
-      expectEvent.inLogs(tx.logs,'ProcessFlightStatus',
+      expectEvent.inLogs(tx.logs,'FlightStatusUpdated',
         {
           airline: this.firstAirline, 
           flight: flight,
