@@ -285,6 +285,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     function pay(address payable customer) external payable whenNotPaused fromAuthorized {
         uint256 balance = creditBalances[customer];
         require(balance > 0,"No payout balance.");
+        require(address(this).balance > balance,"Insufficient funds");
         creditBalances[customer] = 0;
         customer.transfer(balance);
         emit Payout(customer,balance);
