@@ -48,34 +48,57 @@ contract('Oracles', async (accounts) => {
   });
 
 
-  it('can set flight status', async () => {
-    let flight = 'ND1309';
-    let timestamp = Math.floor(Date.now() / 1000);
-    let tx = await this.flightSuretyOracle.fetchFlightStatus(this.firstAirline, flight, timestamp);
-    let requestedIndex = tx.logs[0].args.index;
+  describe("with default response required", async () => {
+    it('can set flight status', async () => {
+      let flight = 'ND1309';
+      let timestamp = Math.floor(Date.now() / 1000);
+      let minResponses = await this.flightSuretyOracle.MIN_RESPONSES.call();
+      let goodResponses = 0;
+      console.log(minResponses.toString());
+      let tx = await this.flightSuretyOracle.registerFlight(this.accounts[0],flight);
+      expectEvent.inLogs(tx.logs,"FlightRegistered",{airline: this.accounts[0],name: flight});
 
-    for(let a=1; a<TEST_ORACLES_COUNT; a++) {
-      // Get oracle information
-      let oracleIndexes = await this.flightSuretyOracle.getMyIndexes.call({ from: accounts[a]});
-      for(let idx=0;idx<3;idx++) {
+      tx = await this.flightSuretyOracle.buy(
+        flight,
+        timestamp,
+        {
+          from: this.accounts[5], 
+          value: web3.utils.toWei("1","ether")
+        }
+      );
+      expectEvent.inLogs(tx.logs,"PolicyPurchased",{customer: this.accounts[5]});
 
-        if (oracleIndexes[idx].toNumber() == requestedIndex.toNumber()) {
-          let tx = await this.flightSuretyOracle.submitOracleResponse(oracleIndexes[idx], this.firstAirline, flight, timestamp, STATUS_CODE_ON_TIME, { from: accounts[a] });
-          expectEvent.inLogs(tx.logs,'OracleReport',
-            {
-              airline: this.firstAirline, 
-              flight: flight,
-              status: web3.utils.toBN(STATUS_CODE_ON_TIME)
+
+      tx = await this.flightSuretyOracle.fetchFlightStatus(this.firstAirline, flight, timestamp);
+      let requestedIndex = tx.logs[0].args.index;
+
+      for(let a=1; a<TEST_ORACLES_COUNT; a++) {
+        // Get oracle information
+        let oracleIndexes = await this.flightSuretyOracle.getMyIndexes.call({ from: accounts[a]});
+        for(let idx=0;idx<3;idx++) {
+
+          if (oracleIndexes[idx].toNumber() == requestedIndex.toNumber()) {
+            if (goodResponses >= minResponses) { //  make this test for deterministic
+              continue; 
             }
-          );
-        } else {
-          await expectRevert(
-            this.flightSuretyOracle.submitOracleResponse(oracleIndexes[idx], this.firstAirline, flight, timestamp, STATUS_CODE_ON_TIME, { from: accounts[a] }),
-            "Flight or timestamp do not match oracle request"
-          );
+            let tx = await this.flightSuretyOracle.submitOracleResponse(oracleIndexes[idx], this.firstAirline, flight, timestamp, STATUS_CODE_ON_TIME, { from: accounts[a] });
+            expectEvent.inLogs(tx.logs,'OracleReport',
+              {
+                airline: this.firstAirline, 
+                flight: flight,
+                status: web3.utils.toBN(STATUS_CODE_ON_TIME)
+              }
+            );
+            goodResponses = goodResponses + 1;
+          } else {
+            await expectRevert(
+              this.flightSuretyOracle.submitOracleResponse(oracleIndexes[idx], this.firstAirline, flight, timestamp, STATUS_CODE_ON_TIME, { from: accounts[a] }),
+              "Flight or timestamp do not match oracle request"
+            );
+          }
         }
       }
-    }
+    });
   });
 
   describe('when min responses are received', async () => {
@@ -90,7 +113,7 @@ contract('Oracles', async (accounts) => {
     });
 
     it("processes flight status",async () => {
-      let flight = 'AA124';
+      let flight = 'AA125';
       let timestamp = Math.floor(Date.now() / 1000);
 
       let tx = await this.flightSuretyOracle.registerFlight(this.accounts[0],flight);

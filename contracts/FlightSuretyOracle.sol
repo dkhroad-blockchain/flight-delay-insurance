@@ -148,6 +148,9 @@ contract FlightSuretyOracle is Pausable, WhitelistAdminRole {
 
             // Handle flight status as appropriate
             processFlightStatus(airline, flight, timestamp, statusCode);
+
+            // close this request to save on gas costs
+            oracleResponses[key].isOpen = false;
         }
     }
 
