@@ -116,7 +116,7 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
 
-    function isDataContactOperational() 
+    function isDataContractOperational() 
                             public 
                             view 
                             returns(bool) 

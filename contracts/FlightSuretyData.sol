@@ -113,7 +113,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     }
 
     function isOperational() external view fromAuthorized returns(bool) {
-        return paused();
+        return !paused();
     }
 
    /**
