@@ -28,12 +28,23 @@ const isDataContractOperational = async (caller) => {
 
   const {isDataContractOperational} = flightSuretyApp.methods;
   const status = await isDataContractOperational().call({from: caller});
-  console.log('zzz: ',status);
+  console.log('contract: isDataContractOperational: ',status);
   return status;
+}
+
+const registerAirline = async (name,airline,caller) => {
+  const { registerAirline } = flightSuretyApp.methods;
+  const status = await registerAirline(airline,name)
+    .send({
+      from: caller
+    });
+  return status;
+
 }
 
 
 export default { 
   init,
   isDataContractOperational,
+  registerAirline,
 }

@@ -21,9 +21,14 @@ const init = async () => {
   // Fallback to localhost; use dev console port by default...
   else {
     console.log('connection to local web3 provider',process.env.REACT_APP_LOCAL_WEB3_PROVIDER);
-    const provider = new Web3.providers.HttpProvider(
-      process.env.REACT_APP_LOCAL_WEB3_PROVIDER
-    );
+    const provider = process.env.REACT_APP_LOCAL_WEB3_PROVIDER;
+    let web3Provider 
+    if (provider.startsWith('ws://')) {
+      web3Provider = new Web3.providers.WebsocketProvider(provider);
+    } else { 
+      web3Provider = new Web3.providers.HttpProvider(provider);
+    }
+    
     web3 = new Web3(provider);
     console.log("No web3 instance injected, using Local web3.");
     return web3;
