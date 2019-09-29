@@ -23,35 +23,17 @@
   },
   "homepage": "https://github.com/dkhroad-blockchain/flight-delay-insurance#readme",
   "dependencies": {
-    "core-js": "^3.2.1",
     "dotenv": "^8.1.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.5.5",
-    "@babel/core": "^7.5.5",
-    "@babel/plugin-proposal-class-properties": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
-    "babel-loader": "^8.0.6",
-    "babel-preset-modern-browsers": "^12.0.0-beta.1",
-    "bignumber.js": "^9.0.0",
     "chai": "^4.2.0",
-    "css-loader": "^3.1.0",
     "eslint": "^6.3.0",
     "express": "^4.17.1",
-    "file-loader": "^4.1.0",
-    "html-loader": "^0.5.5",
-    "html-webpack-plugin": "^3.2.0",
     "nodemon": "^1.19.2",
     "openzeppelin-solidity": "^2.3.0",
     "openzeppelin-test-helpers": "^0.4.3",
-    "start-server-webpack-plugin": "^2.2.5",
-    "style-loader": "^0.23.1",
     "truffle": "^5.0.32",
     "truffle-hdwallet-provider": "^1.0.15",
-    "web3": "^1.2.0",
-    "webpack": "^4.39.1",
-    "webpack-cli": "^3.3.6",
-    "webpack-dev-server": "^3.7.2",
-    "webpack-node-externals": "^1.7.2"
+    "web3": "^1.2.0"
   }
 }
