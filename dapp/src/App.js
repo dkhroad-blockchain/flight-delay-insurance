@@ -14,12 +14,8 @@ import Home from './components/Home';
 import Airline from './components/Airline';
 import NavBar from './components/NavBar';
 import Notification, {ErrorNotification} from './components/Notification';
+import {filterEvents} from './utils/events';
 // import './App.css';
-
-
-let web3;
-let accounts;
-let contract;
 
 
 
@@ -29,83 +25,108 @@ const App = () => {
   const [web3Ready,setWeb3Ready] = useState(false);
   const [contractReady,setContractReady] = useState(false);
   const [dataContractStatus,setDataContractStatus] = useState(false);
-  const [events,setEvents] = useState([]);
+  const [appEvents,setAppEvents] = useState([]);
+  const [dataEvents,setDataEvents] = useState([]);
   const [possibleAirlines,setPossibleAirlines] = useState([])
   const [errorMessage,setErrorMessage] = useState(null);
   const [infoMessage,setInfoMessage] = useState(null);
+  const [accounts,setAccounts] = useState(null);
 
 
 
   useEffect(  () => {
     const initWeb3 = async () => {
 
-
-      const filterReturnValues = (rv) => {
-        return Object.keys(rv).filter(key => key.match(/[0-9]/) === null)
-          .reduce((obj,key) => {
-          return {...obj, [key]: rv[key]};
-        },{});
-      }
-
-      const filterEvents = events => {
-        const evts = events.map(e => {
-          var obj = {};
-          const rvs = filterReturnValues(e.returnValues);
-          return {...obj,event: e.event,txHash: e.transactionHash,params: JSON.stringify(rvs)};
-        });
-        return evts;
-        
-      }
       try {
-        web3 = await Web3();
-        accounts = await web3.eth.getAccounts();
-        setPossibleAirlines(accounts.slice(0,9));
-        setWeb3Ready(true);
-        const contract =  await contractService.init(web3);
-        let pastEvents = await contract.getPastEvents( {fromBlock: 0});
-        pastEvents = filterEvents(pastEvents);
-        setEvents(pastEvents);
-        contract.events.allEvents({},dumpEvents);
-        setContractReady(true);
-        const status = await contractService.isDataContractOperational(accounts[0]);
+        const web3 = await Web3();
+        const _accounts = await web3.eth.getAccounts();
+        setAccounts(_accounts);
+        setPossibleAirlines(_accounts.slice(0,9));
+        const {contract,dataContract} =  await contractService.init();
+        const status = await contractService.isDataContractOperational(_accounts[0]);
         setDataContractStatus(status);
+
+        // let pastEvents = await contract.getPastEvents( {fromBlock: 0});
+        // pastEvents = filterEvents(pastEvents);
+        // setAppEvents(pastEvents);
+        setWeb3Ready(true);
+        setContractReady(true);
+        // pastEvents = await dataContract.getPastEvents( {fromBlock: 0});
+        // pastEvents = filterEvents(pastEvents);
+        // setDataEvents(pastEvents);
+
+        // contract.events.allEvents({fromBlock: 0},handleAppWeb3Events);
+        // dataContract.events.AirlineRegistered({fromBlock: 0},handleRegisterAirlineEvent);
+        // dataContract.events.allEvents({}.handleDataWeb3Events);
         setInfoMessage('Application successfully connected to the blockchain');
-        // setTimeout(() => setInfoMessage(null),2000);
       } catch(error) {
         alert('Failed to load web3, accounts, or contract. Check console for details');
         console.error(error);
       }
     }
+    console.log('runnin useEffect 1');
     initWeb3();
 
   },[]);
 
-  const dumpEvents = (error,evt) => {
+  useEffect( () => {
+    ( async () => { 
+      console.log('runnin useEffect 2');
+      const {contract,dataContract} = await contractService.init();
+      let pastEvents = await contract.getPastEvents( {fromBlock: 0});
+      pastEvents = filterEvents(pastEvents);
+      setAppEvents(pastEvents);
+    })();
+    
+  },[contractReady]);
+
+  useEffect( () => {
+    ( async () => { 
+      console.log('runnin useEffect 3');
+      const {contract,dataContract} = await contractService.init();
+
+      let pastEvents = await dataContract.getPastEvents( {fromBlock: 0});
+      pastEvents = filterEvents(pastEvents);
+      setDataEvents(pastEvents);
+
+      dataContract.events.AirlineRegistered(
+        {fromBlock: 0},
+        handleRegisterAirlineEvent
+      );
+      // dataContract.events.allEvents({}.handleDataWeb3Events);
+    })();
+  },[dataContractStatus]);
+
+  const handleAppWeb3Events = async (error,evt) => {
     if (error) {
       console.log('dumpEvents error',error);
     } else {
-      const filter = (rv) => {
-        return Object.keys(rv).filter(key => key.match(/[0-9]/) === null)
-          .reduce((obj,key) => {
-          return {...obj, [key]: rv[key]};
-        },{});
-      }
     
-      console.log('rcvd evt',evt);
-      console.log('------');
-      const {event, transactionHash, returnValues } = evt;
-      const values = filter(evt.returnValues); 
-      const newEvent = {event: event,txHash: transactionHash, params: JSON.stringify(values)};
-      // console.log(newEvent);
-      setEvents(events.concat([newEvent]));
+      const newEvent = filterEvents([evt]);
+      setAppEvents(appEvents.concat(newEvent));
     }
   }
 
+  const handleDataWeb3Events = async (error,evt) => {
+    if (error) {
+      console.log('dumpEvents error',error);
+    } else {
+      const newEvent = filterEvents([evt]);
+      setDataEvents(dataEvents.concat(newEvent));
+    }
+  }
+
+  const handleRegisterAirlineEvent = (error,evt) => {
+    if (error) {
+      console.log('dumpEvents error',error);
+    } else {
+      const newEvent = filterEvents([evt]);
+      setDataEvents(dataEvents.concat(newEvent));
+    }
+
+  }
 
 
-  // const handleErrorNotification = () => {
-  //   setErrorMessage(null);
-  // }
 
 
   return (
@@ -114,7 +135,7 @@ const App = () => {
           <NavBar />
           <Notification message={infoMessage} handleDismiss={setInfoMessage} />
           <ErrorNotification message={errorMessage} handleDismiss={setErrorMessage}/>
-          <Route exact path="/" render={() => <Home events={events} ready={web3Ready} accounts={accounts} status={dataContractStatus} /> } />
+          <Route exact path="/" render={() => <Home appEvents={appEvents} dataEvents={dataEvents} ready={web3Ready} accounts={accounts} status={dataContractStatus} /> } />
           <Route  
             path="/airlines" render={() => 
               <Airline 

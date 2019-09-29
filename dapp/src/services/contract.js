@@ -1,27 +1,38 @@
 import FlightSuretyAppArtifacts from '../contracts/FlightSuretyApp.json';
+import FlightSuretyDataArtifacts from '../contracts/FlightSuretyData.json';
 import Web3 from '../utils/Web3';
 
 let web3;
 let flightSuretyApp;
+let flightSuretyData;
 
-const init = async (_web3) => {
+const createContract = (networkId,artifacts) => {
+  const deployedNetwork = artifacts.networks[networkId];
+  if (deployedNetwork === undefined) {
+    throw new Error(`contract not found on network ${networkId}`);
+  }
+  const contract = new web3.eth.Contract(
+    artifacts.abi,
+    deployedNetwork && deployedNetwork.address, {
+      gasPrice: '20000000000',
+      gas: '6700000',
+    }
+  );
+  return contract;
+}
+const init = async () => {
   web3 = await Web3(); 
   if (!flightSuretyApp) {
     const networkId = await web3.eth.net.getId();
+    
     const deployedNetwork = FlightSuretyAppArtifacts.networks[networkId];
     if (deployedNetwork === undefined) {
       throw new Error(`contract not found on network ${networkId}`);
     }
-    flightSuretyApp = new web3.eth.Contract(
-      FlightSuretyAppArtifacts.abi,
-      deployedNetwork && deployedNetwork.address, {
-        gasPrice: '20000000000',
-        gas: '6700000',
-      }
-    );
+    flightSuretyApp = createContract(networkId,FlightSuretyAppArtifacts); 
+    flightSuretyData = createContract(networkId,FlightSuretyDataArtifacts); 
   }
-
-  return flightSuretyApp;
+  return {contract: flightSuretyApp, dataContract: flightSuretyData};
 }
 
 const isDataContractOperational = async (caller) => {

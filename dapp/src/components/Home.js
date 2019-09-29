@@ -1,5 +1,5 @@
 import React from 'react';
-import {Container,Header} from 'semantic-ui-react';
+import {Container,Header,Segment} from 'semantic-ui-react';
 
 const Status = ({status}) => {
   return (
@@ -47,14 +47,28 @@ const Events = ({ready,events}) => {
     }
 
 }
-const Home = ({events,ready,accounts,status}) => 
+const Home = ({appEvents,ready,dataEvents,accounts,status}) =>  {
+  const showEvents = () => {
+    console.log(appEvents);
+  }
+
+  return (
   <Container>
   <Header as='h3'>Accounts</Header>
   <Account ready={ready} accounts={accounts} />
   <Header as='h3'>Status</Header>
   <Status status={status} />
-  <Header as='h3'>Events</Header>
-  <Events ready={ready} events={events} />
+  <Header as='h3'>App Events</Header>
+  <Segment>
+   <Events ready={ready} events={appEvents} />
+  </Segment>
+  <Header as='h3'>Data Events</Header>
+  <Segment>
+   <Events ready={ready} events={dataEvents} />
+  </Segment>
+  <button onClick={showEvents}>ShowEvents</button>
   </Container>
+  )
 
+  }
 export default Home;

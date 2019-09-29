@@ -20635,8 +20635,8 @@
         }
       },
       "links": {},
-      "address": "0xd449454c79f48D5aFa1F089E34ee439E18aFF26d",
-      "transactionHash": "0x28057538d1422d97569f96b4b7540442e3d16178b93c835a70606c0871498d5b"
+      "address": "0x3A16fFAA4d5412256fBCE49308a062c5F5070438",
+      "transactionHash": "0xda59c6b214f0a4fc086d7155ee871c132974fabbcaaefaf888ddf30564b675af"
     },
     "1569293655574": {
       "events": {
@@ -21165,10 +21165,274 @@
       "links": {},
       "address": "0xCC3F74168146EA7B7097F072068235f707322A4F",
       "transactionHash": "0x6542322979c4d4f93ec4d2625d0a35731126ecfe4637147c8e3fe94bd85da301"
+    },
+    "1569785850449": {
+      "events": {
+        "0xdc84e3a4c83602050e3865df792a4e6800211a79ac60db94e703a820ce892924": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "contractAddress",
+              "type": "address"
+            }
+          ],
+          "name": "Authorized",
+          "type": "event",
+          "signature": "0xdc84e3a4c83602050e3865df792a4e6800211a79ac60db94e703a820ce892924"
+        },
+        "0xc6e68059f6c59235d88b015cebfbecb5ec0a89bca225e2b54303d9f4bcd397de": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "contractAddress",
+              "type": "address"
+            }
+          ],
+          "name": "DeAuthorized",
+          "type": "event",
+          "signature": "0xc6e68059f6c59235d88b015cebfbecb5ec0a89bca225e2b54303d9f4bcd397de"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event",
+          "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        },
+        "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "Paused",
+          "type": "event",
+          "signature": "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258"
+        },
+        "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "Unpaused",
+          "type": "event",
+          "signature": "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa"
+        },
+        "0x6719d08c1888103bea251a4ed56406bd0c3e69723c8a1686e017e7bbe159b6f8": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "PauserAdded",
+          "type": "event",
+          "signature": "0x6719d08c1888103bea251a4ed56406bd0c3e69723c8a1686e017e7bbe159b6f8"
+        },
+        "0xcd265ebaf09df2871cc7bd4133404a235ba12eff2041bb89d9c714a2621c7c7e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "PauserRemoved",
+          "type": "event",
+          "signature": "0xcd265ebaf09df2871cc7bd4133404a235ba12eff2041bb89d9c714a2621c7c7e"
+        },
+        "0xdaadac9f3079423f7d181e3d49e449f1047be14f86f3422009d15b8ad98cdc8e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "airline",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "indexed": true,
+              "name": "by",
+              "type": "address"
+            }
+          ],
+          "name": "AirlineRegistered",
+          "type": "event",
+          "signature": "0xdaadac9f3079423f7d181e3d49e449f1047be14f86f3422009d15b8ad98cdc8e"
+        },
+        "0xe3e3c2f23f7445131259937f93b9ed0c075fe06c9d702be2d7ac549d0ec5fc32": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "airline",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "name": "AirlineFunded",
+          "type": "event",
+          "signature": "0xe3e3c2f23f7445131259937f93b9ed0c075fe06c9d702be2d7ac549d0ec5fc32"
+        },
+        "0x8b8961810a39fd56d36e421278c7737795a230b372ac246eb46d37eae370db5f": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "customer",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "policy",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "flight",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "timestamp",
+              "type": "uint256"
+            }
+          ],
+          "name": "PolicyPurchased",
+          "type": "event",
+          "signature": "0x8b8961810a39fd56d36e421278c7737795a230b372ac246eb46d37eae370db5f"
+        },
+        "0x8ced3ffd3f4fca149e135d4dbe2bbeb4af078bdfebc009ef755388d2543a9f85": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "airline",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "flight",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "policy",
+              "type": "uint256"
+            }
+          ],
+          "name": "FlightStatusUpdated",
+          "type": "event",
+          "signature": "0x8ced3ffd3f4fca149e135d4dbe2bbeb4af078bdfebc009ef755388d2543a9f85"
+        },
+        "0x9b8d8ae824bbf1324365dd292d6415911834d1371fdfe968815e2814f645e348": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "airline",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "flight",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "name",
+              "type": "string"
+            }
+          ],
+          "name": "FlightRegistered",
+          "type": "event",
+          "signature": "0x9b8d8ae824bbf1324365dd292d6415911834d1371fdfe968815e2814f645e348"
+        },
+        "0x697f42de413c96141e86c7822138ea204f205fe3028b668c02338e6b9141ad58": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "customer",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "payout",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "policy",
+              "type": "uint256"
+            }
+          ],
+          "name": "InsuranceCredit",
+          "type": "event",
+          "signature": "0x697f42de413c96141e86c7822138ea204f205fe3028b668c02338e6b9141ad58"
+        },
+        "0x5afeca38b2064c23a692c4cf353015d80ab3ecc417b4f893f372690c11fbd9a6": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "customer",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "Payout",
+          "type": "event",
+          "signature": "0x5afeca38b2064c23a692c4cf353015d80ab3ecc417b4f893f372690c11fbd9a6"
+        }
+      },
+      "links": {},
+      "address": "0xD700F08DFa4295dD64B1fb4197aDB88b1C6751dd",
+      "transactionHash": "0xb9f8746a9292dec07ee0a5ebac39de15c35054828253c195c2ab6e6440b7fa9d"
     }
   },
   "schemaVersion": "3.0.16",
-  "updatedAt": "2019-09-29T16:44:02.224Z",
+  "updatedAt": "2019-09-29T23:08:02.306Z",
   "devdoc": {
     "methods": {
       "buy(address,uint256,uint256,uint256)": {
