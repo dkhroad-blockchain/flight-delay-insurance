@@ -23,7 +23,7 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
     uint256 totalRegisteredAirlines;
     uint256 totalEligibleAirlines;
 
-    uint256 private airlineMinimumFundsRequirement = 10 ether;
+    uint256 public AIRLINE_REGISTRATION_FEE =  10 ether; 
 
     mapping(uint256 => uint256) private payOutParams;
 
@@ -87,7 +87,7 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
 
     function _isFunded() internal returns(bool) {
         uint256 balance = flightSuretyDataContract.getAirlineBalance(msg.sender);
-        return balance >= airlineMinimumFundsRequirement;
+        return balance >= AIRLINE_REGISTRATION_FEE;
     }
 
     /********************************************************************************************/
@@ -163,7 +163,7 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
 
     function _fund(address airline) internal {
         uint256 balance = flightSuretyDataContract.fund.value(msg.value)(airline);
-        if (balance >= airlineMinimumFundsRequirement) {
+        if (balance >= AIRLINE_REGISTRATION_FEE) {
             // emit AirlineFunded(airline,msg.value);
             addSigner(airline);
             totalEligibleAirlines += 1;
@@ -328,7 +328,7 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
       * TODO: make it require multi-party consensus
       */
     function setAirlineMinimumFunds(uint256 minFund) external whenNotPaused onlyWhitelistAdmin  {
-        airlineMinimumFundsRequirement = minFund;
+        AIRLINE_REGISTRATION_FEE = minFund;
     }
 
 
