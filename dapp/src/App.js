@@ -1,4 +1,4 @@
-import React, {useEffect,useState,useImperativeHandle, useCallback} from 'react';
+import React, {useEffect,useState,useImperativeHandle, useRef} from 'react';
 import Web3 from  './utils/Web3';
 import contractService from './services/contract';
 import {
@@ -28,11 +28,14 @@ const App = () => {
   const [appEvents,setAppEvents] = useState([]);
   const [dataEvents,setDataEvents] = useState([]);
   const [possibleAirlines,setPossibleAirlines] = useState([])
+  const [registeredAirlines,setRegisterdAirlnes] = useState([]);
   const [errorMessage,setErrorMessage] = useState(null);
   const [infoMessage,setInfoMessage] = useState(null);
   const [accounts,setAccounts] = useState(null);
 
-
+  let regAirRef = useRef(registeredAirlines);
+  let appEventsRef = useRef(appEvents);
+  let dataEventsRef = useRef(dataEvents);
 
   useEffect(  () => {
     const initWeb3 = async () => {
@@ -76,26 +79,31 @@ const App = () => {
       let pastEvents = await contract.getPastEvents( {fromBlock: 0});
       pastEvents = filterEvents(pastEvents);
       setAppEvents(pastEvents);
+      // const airlines = registeredAirlines(pastEvents);
+      pastEvents = await dataContract.getPastEvents( {fromBlock: 0});
+      pastEvents = filterEvents(pastEvents);
+      setDataEvents(pastEvents);
     })();
     
-  },[contractReady]);
+  },[]);
 
   useEffect( () => {
     ( async () => { 
       console.log('runnin useEffect 3');
       const {contract,dataContract} = await contractService.init();
 
-      let pastEvents = await dataContract.getPastEvents( {fromBlock: 0});
-      pastEvents = filterEvents(pastEvents);
-      setDataEvents(pastEvents);
-
+      dataContract.events.allEvents(handleDataWeb3Events);
       dataContract.events.AirlineRegistered(
-        {fromBlock: 0},
         handleRegisterAirlineEvent
       );
-      // dataContract.events.allEvents({}.handleDataWeb3Events);
     })();
-  },[dataContractStatus]);
+  },[]);
+
+  useEffect( () => {
+    regAirRef.current = registeredAirlines;
+    appEventsRef.current = appEvents;
+    dataEventsRef.current = dataEvents;
+  });
 
   const handleAppWeb3Events = async (error,evt) => {
     if (error) {
@@ -103,7 +111,7 @@ const App = () => {
     } else {
     
       const newEvent = filterEvents([evt]);
-      setAppEvents(appEvents.concat(newEvent));
+      setAppEvents(appEventsRef.current.concat(newEvent));
     }
   }
 
@@ -112,7 +120,9 @@ const App = () => {
       console.log('dumpEvents error',error);
     } else {
       const newEvent = filterEvents([evt]);
-      setDataEvents(dataEvents.concat(newEvent));
+      console.log('all dataEvents 1',newEvent);
+      // console.log('all dataEvents 2', dataEvents.concat(newEvent));
+      setDataEvents(dataEventsRef.current.concat(newEvent));
     }
   }
 
@@ -120,8 +130,12 @@ const App = () => {
     if (error) {
       console.log('dumpEvents error',error);
     } else {
+      const airline = evt.returnValues.airline;
+      setRegisterdAirlnes(regAirRef.current.concat(airline));
       const newEvent = filterEvents([evt]);
-      setDataEvents(dataEvents.concat(newEvent));
+      console.log('registeredAirlinesEvent airline ',airline);
+      console.log('this',this);
+      setDataEvents(dataEventsRef.current.concat(newEvent));
     }
 
   }
