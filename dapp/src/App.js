@@ -106,7 +106,7 @@ const App = () => {
     ( async () => { 
       console.log('runnin useEffect 3');
       const {contract,dataContract} = await contractService.init();
-
+      contract.events.allEvents(handleAppWeb3Events);
       dataContract.events.allEvents(handleDataWeb3Events);
     })();
   },[]);
