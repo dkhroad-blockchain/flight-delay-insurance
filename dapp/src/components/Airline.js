@@ -15,6 +15,9 @@ const ErrorMessage = ({header,content}) => {
 const RegisterAirlineForm = ({
   availableAccounts,
   fundedAirlines,
+  name,
+  address,
+  requester,
   handleNameChange,
   handleAddressChange,
   handleRequesterChange,
@@ -35,9 +38,9 @@ const RegisterAirlineForm = ({
       <Header as='h3'>Register</Header>
       <Form loading={loading} onSubmit={onSubmit} >
       <Form.Group grouped> 
-        <Form.Input  required label='Name' placeholder='Airline name' onChange={handleNameChange} />
-        <Form.Select required label='Address' placeholder='Airline address' options={createOptions(availableAccounts)} onChange={handleAddressChange} />
-        <Form.Select required label='Requester' options={createOptions(fundedAirlines)} placeholder='A registerd airline' onChange={handleRequesterChange} />
+        <Form.Input  required value={name} label='Name' placeholder='Airline name' onChange={handleNameChange} />
+        <Form.Select required value={address} label='Address' placeholder='Airline address' options={createOptions(availableAccounts)} onChange={handleAddressChange} />
+        <Form.Select required value={requester} label='Requester' options={createOptions(fundedAirlines)} placeholder='A registerd airline' onChange={handleRequesterChange} />
       </Form.Group>
       <Form.Button>Submit</Form.Button>
     </Form>
@@ -103,6 +106,9 @@ const Airline = ({
       <RegisterAirlineForm 
         availableAccounts={availableAccounts()}
         fundedAirlines={fundedAirlines}
+        name={name}
+        address={address}
+        requester={requester}
         handleNameChange={handleNameChange}
         handleAddressChange={handleAddressChange}
         handleRequesterChange={handleRequesterChange}

@@ -146,7 +146,6 @@ const App = () => {
       setRegisterdAirlnes(regAirRef.current.concat(airline));
       const newEvent = processEvents([evt]);
       console.log('registeredAirlinesEvent airline ',airline);
-      console.log('this',this);
       setDataEvents(dataEventsRef.current.concat(newEvent));
     }
 
