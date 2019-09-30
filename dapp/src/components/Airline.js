@@ -121,11 +121,12 @@ const Airline = ({
   </Grid.Row>
   <Grid.Row>
     <Grid.Column>
+      <Header as='h3'>Funded Airlines</Header>
       <Segment>
-        { availableAccounts.length > 0
+        { fundedAirlines.length > 0
             ? 
               <ul>
-                {availableAccounts.map( a => <li key={'_' + Math.random().toString(36).substring(2,9)}>{a}</li> )}
+                {fundedAirlines.map( a => <li key={'_' + Math.random().toString(36).substring(2,9)}>{a}</li> )}
               </ul>
             : <div>No accounts</div>
         }
