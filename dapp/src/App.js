@@ -14,7 +14,7 @@ import Home from './components/Home';
 import Airline from './components/Airline';
 import NavBar from './components/NavBar';
 import Notification, {ErrorNotification} from './components/Notification';
-import {filterEvents} from './utils/events';
+import {filterEvents, processEvents} from './utils/events';
 // import './App.css';
 
 
@@ -29,6 +29,7 @@ const App = () => {
   const [dataEvents,setDataEvents] = useState([]);
   const [possibleAirlines,setPossibleAirlines] = useState([])
   const [registeredAirlines,setRegisterdAirlnes] = useState([]);
+  const [fundedAirlines,setFundedAirlines] = useState([]);
   const [errorMessage,setErrorMessage] = useState(null);
   const [infoMessage,setInfoMessage] = useState(null);
   const [accounts,setAccounts] = useState(null);
@@ -50,12 +51,12 @@ const App = () => {
         setDataContractStatus(status);
 
         // let pastEvents = await contract.getPastEvents( {fromBlock: 0});
-        // pastEvents = filterEvents(pastEvents);
+        // pastEvents = processEvents(pastEvents);
         // setAppEvents(pastEvents);
         setWeb3Ready(true);
         setContractReady(true);
         // pastEvents = await dataContract.getPastEvents( {fromBlock: 0});
-        // pastEvents = filterEvents(pastEvents);
+        // pastEvents = processEvents(pastEvents);
         // setDataEvents(pastEvents);
 
         // contract.events.allEvents({fromBlock: 0},handleAppWeb3Events);
@@ -77,12 +78,22 @@ const App = () => {
       console.log('runnin useEffect 2');
       const {contract,dataContract} = await contractService.init();
       let pastEvents = await contract.getPastEvents( {fromBlock: 0});
-      pastEvents = filterEvents(pastEvents);
+      pastEvents = processEvents(pastEvents);
       setAppEvents(pastEvents);
-      // const airlines = registeredAirlines(pastEvents);
       pastEvents = await dataContract.getPastEvents( {fromBlock: 0});
-      pastEvents = filterEvents(pastEvents);
+      pastEvents = processEvents(pastEvents);
       setDataEvents(pastEvents);
+
+      const registered = filterEvents(pastEvents,'AirlineRegistered');
+      const funded = filterEvents(pastEvents,'AirlineFunded');
+      const registeredOnly = registered.filter(account => -1 === funded.indexOf(account));
+      // let available = _accounts.filter(acc => -1 === registered.indexOf(acc));
+      // available = available.filter(acc => -1 === funded.index(acc));
+
+      setRegisterdAirlnes(registeredOnly);
+      setFundedAirlines(funded);
+      // setPossibleAirlines(available);
+      console.log('already registeredAirlines',registeredOnly,funded);
     })();
     
   },[]);
@@ -105,12 +116,13 @@ const App = () => {
     dataEventsRef.current = dataEvents;
   });
 
+
   const handleAppWeb3Events = async (error,evt) => {
     if (error) {
       console.log('dumpEvents error',error);
     } else {
     
-      const newEvent = filterEvents([evt]);
+      const newEvent = processEvents([evt]);
       setAppEvents(appEventsRef.current.concat(newEvent));
     }
   }
@@ -119,7 +131,7 @@ const App = () => {
     if (error) {
       console.log('dumpEvents error',error);
     } else {
-      const newEvent = filterEvents([evt]);
+      const newEvent = processEvents([evt]);
       console.log('all dataEvents 1',newEvent);
       // console.log('all dataEvents 2', dataEvents.concat(newEvent));
       setDataEvents(dataEventsRef.current.concat(newEvent));
@@ -132,7 +144,7 @@ const App = () => {
     } else {
       const airline = evt.returnValues.airline;
       setRegisterdAirlnes(regAirRef.current.concat(airline));
-      const newEvent = filterEvents([evt]);
+      const newEvent = processEvents([evt]);
       console.log('registeredAirlinesEvent airline ',airline);
       console.log('this',this);
       setDataEvents(dataEventsRef.current.concat(newEvent));
@@ -155,7 +167,9 @@ const App = () => {
               <Airline 
                 setErrorMessage={setErrorMessage} 
                 setInfoMessage={setInfoMessage}  
-                availableAccounts={possibleAirlines}
+                possibleAirlines={possibleAirlines}
+                registeredAirlines={registeredAirlines}
+                fundedAirlines={fundedAirlines}
               /> 
               } 
             />

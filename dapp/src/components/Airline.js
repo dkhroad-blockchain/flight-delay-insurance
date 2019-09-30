@@ -13,21 +13,31 @@ const ErrorMessage = ({header,content}) => {
   );
 }
 const RegisterAirlineForm = ({
-  options,
+  availableAccounts,
+  fundedAirlines,
   handleNameChange,
   handleAddressChange,
   handleRequesterChange,
   loading,
   onSubmit}) => {
   
+  const createOptions = (accounts) => {
+    const o =  accounts.map(a => {
+      var obj;
+      obj = { text: a, value: a }
+      return obj;
+    });
+    return o;
+  };
+
   return (
   <>
       <Header as='h3'>Register</Header>
       <Form loading={loading} onSubmit={onSubmit} >
       <Form.Group grouped> 
         <Form.Input  required label='Name' placeholder='Airline name' onChange={handleNameChange} />
-        <Form.Select required label='Address' placeholder='Airline address' options={options} onChange={handleAddressChange} />
-        <Form.Select required label='Requester' options={options} placeholder='A registerd airline' onChange={handleRequesterChange} />
+        <Form.Select required label='Address' placeholder='Airline address' options={createOptions(availableAccounts)} onChange={handleAddressChange} />
+        <Form.Select required label='Requester' options={createOptions(fundedAirlines)} placeholder='A registerd airline' onChange={handleRequesterChange} />
       </Form.Group>
       <Form.Button>Submit</Form.Button>
     </Form>
@@ -35,8 +45,11 @@ const RegisterAirlineForm = ({
   )
 }
 
-
-const Airline = ({availableAccounts, setErrorMessage}) => {
+const Airline = ({
+  possibleAirlines,
+  registeredAirlines,
+  fundedAirlines,
+  setErrorMessage}) => {
   const [name,setName] = useState('');
   const [address,setAddress] = useState('');
   const [requester,setRequester] = useState('');
@@ -50,16 +63,21 @@ const Airline = ({availableAccounts, setErrorMessage}) => {
   const handleRequesterChange = (event,{value}) => 
     setRequester(value);
 
-  const notificationRef = React.createRef();
+
 
   const handleAirlineRegistration = async event => {
     event.preventDefault();
     setLoading(true)
     console.log('name',name,address,funds);
     try {
-    const status = await contract.registerAirline(name,address,requester); 
-    console.log(status);
-    setLoading(false);
+      const status = await contract.registerAirline(name,address,requester); 
+      console.log(status);
+      setName('');
+      setAddress('');
+      setRequester('');
+      
+      setLoading(false);
+
     } catch (error) {
       console.log('error',error);
       setLoading(false);
@@ -67,16 +85,14 @@ const Airline = ({availableAccounts, setErrorMessage}) => {
     }
   }
 
-  const createOptions = (accounts) => {
-    const o =  accounts.map(a => {
-      var obj;
-      obj = { text: a, value: a }
-      return obj;
-    });
-    return o;
-  }
 
-  const accounts = createOptions(availableAccounts);
+  // const availableAccounts = createOptions(availableToRegister());
+
+  const availableAccounts = () => {
+      let accts = possibleAirlines.filter(acc => -1 === registeredAirlines.indexOf(acc));
+      accts = accts.filter(acc => -1 === fundedAirlines.indexOf(acc));
+      return accts;
+  }
 
   return (
     <Container>
@@ -85,7 +101,8 @@ const Airline = ({availableAccounts, setErrorMessage}) => {
   <Grid.Row>
     <Grid.Column>
       <RegisterAirlineForm 
-        options={accounts} 
+        availableAccounts={availableAccounts()}
+        fundedAirlines={fundedAirlines}
         handleNameChange={handleNameChange}
         handleAddressChange={handleAddressChange}
         handleRequesterChange={handleRequesterChange}
@@ -103,6 +120,20 @@ const Airline = ({availableAccounts, setErrorMessage}) => {
                 {availableAccounts.map( a => <li key={'_' + Math.random().toString(36).substring(2,9)}>{a}</li> )}
               </ul>
             : <div>No accounts</div>
+        }
+      </Segment>
+    </Grid.Column>
+    </Grid.Row>
+  <Grid.Row>
+    <Grid.Column>
+      <Header as='h3'>Registered (but not funded) Airlines</Header>
+      <Segment>
+        { registeredAirlines.length > 0
+            ? 
+              <ul>
+                {registeredAirlines.map( a => <li key={'_' + Math.random().toString(36).substring(2,9)}>{a}</li> )}
+              </ul>
+            : <div>No Registered accounts</div>
         }
       </Segment>
     </Grid.Column>
