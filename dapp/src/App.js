@@ -36,6 +36,7 @@ const App = () => {
   const [airlineRegFee,setAirlineRegFee] = useState('');
 
   let regAirRef = useRef(registeredAirlines);
+  let fundedAirRef = useRef(fundedAirlines);
   let appEventsRef = useRef(appEvents);
   let dataEventsRef = useRef(dataEvents);
 
@@ -107,14 +108,12 @@ const App = () => {
       const {contract,dataContract} = await contractService.init();
 
       dataContract.events.allEvents(handleDataWeb3Events);
-      dataContract.events.AirlineRegistered(
-        handleRegisterAirlineEvent
-      );
     })();
   },[]);
 
   useEffect( () => {
     regAirRef.current = registeredAirlines;
+    fundedAirRef.current = fundedAirlines;
     appEventsRef.current = appEvents;
     dataEventsRef.current = dataEvents;
   });
@@ -136,22 +135,35 @@ const App = () => {
     } else {
       const newEvent = processEvents([evt]);
       console.log('all dataEvents 1',newEvent);
+      handleRegisterAirlineEvent(newEvent[0]);
+      handleFundedAirlineEvent(newEvent[0]);
       // console.log('all dataEvents 2', dataEvents.concat(newEvent));
       setDataEvents(dataEventsRef.current.concat(newEvent));
+      
+
     }
   }
 
-  const handleRegisterAirlineEvent = (error,evt) => {
-    if (error) {
-      console.log('dumpEvents error',error);
-    } else {
-      const airline = evt.returnValues.airline;
-      setRegisterdAirlnes(regAirRef.current.concat(airline));
-      const newEvent = processEvents([evt]);
-      console.log('registeredAirlinesEvent airline ',airline);
-      setDataEvents(dataEventsRef.current.concat(newEvent));
+  const handleFundedAirlineEvent = newEvent => {
+    if (newEvent.event === 'AirlineFunded') {
+      console.log('airline funded event ',newEvent);
+      const fundedAirline = JSON.parse(newEvent.params).airline;
+      setRegisterdAirlnes(
+        regAirRef.current.filter(airline => airline !== fundedAirline)
+      );
+      setFundedAirlines(
+        fundedAirRef.current.concat(fundedAirline)
+      );
     }
 
+  }
+
+  const handleRegisterAirlineEvent = newEvent => {
+    if (newEvent.event === 'AirlineRegistered') {
+      console.log('airline registered event ',newEvent);
+      const airline = JSON.parse(newEvent.params).airline;
+      setRegisterdAirlnes(regAirRef.current.concat(airline));
+    }
   }
 
 
