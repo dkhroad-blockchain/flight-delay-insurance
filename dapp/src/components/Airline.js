@@ -52,6 +52,7 @@ const Airline = ({
   possibleAirlines,
   registeredAirlines,
   fundedAirlines,
+  setInfoMessage,
   setErrorMessage}) => {
   const [name,setName] = useState('');
   const [address,setAddress] = useState('');
@@ -80,6 +81,7 @@ const Airline = ({
       setRequester('');
       
       setLoading(false);
+      setInfoMessage('Airline registered successfully!');
 
     } catch (error) {
       console.log('error',error);
