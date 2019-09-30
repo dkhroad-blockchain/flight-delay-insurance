@@ -33,6 +33,7 @@ const App = () => {
   const [errorMessage,setErrorMessage] = useState(null);
   const [infoMessage,setInfoMessage] = useState(null);
   const [accounts,setAccounts] = useState(null);
+  const [airlineRegFee,setAirlineRegFee] = useState('');
 
   let regAirRef = useRef(registeredAirlines);
   let appEventsRef = useRef(appEvents);
@@ -47,6 +48,8 @@ const App = () => {
         setAccounts(_accounts);
         setPossibleAirlines(_accounts.slice(0,9));
         const {contract,dataContract} =  await contractService.init();
+        const regFee = await contractService.airlineRegistrationFee();
+        setAirlineRegFee(web3.utils.fromWei(regFee,'ether').toString());
         const status = await contractService.isDataContractOperational(_accounts[0]);
         setDataContractStatus(status);
 
@@ -169,6 +172,7 @@ const App = () => {
                 possibleAirlines={possibleAirlines}
                 registeredAirlines={registeredAirlines}
                 fundedAirlines={fundedAirlines}
+                airlineRegFee={airlineRegFee}
               /> 
               } 
             />

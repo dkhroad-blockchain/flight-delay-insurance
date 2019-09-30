@@ -53,9 +53,23 @@ const registerAirline = async (name,airline,caller) => {
 
 }
 
+const airlineRegistrationFee = async () => {
+  const { AIRLINE_REGISTRATION_FEE } = flightSuretyApp.methods;
+  return await AIRLINE_REGISTRATION_FEE().call();
+}
+
+const fundAirline = async (airline,funds) => {
+  const {fund} = flightSuretyApp.methods;
+  const status = await fund(airline)
+    .send({from: airline, value: web3.utils.toWei(funds,'ether')});
+  return status;
+}
+
 
 export default { 
   init,
   isDataContractOperational,
   registerAirline,
+  airlineRegistrationFee,
+  fundAirline,
 }
