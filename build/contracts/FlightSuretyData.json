@@ -21432,7 +21432,7 @@
     }
   },
   "schemaVersion": "3.0.16",
-  "updatedAt": "2019-09-29T23:08:02.306Z",
+  "updatedAt": "2019-09-30T05:23:12.009Z",
   "devdoc": {
     "methods": {
       "buy(address,uint256,uint256,uint256)": {
