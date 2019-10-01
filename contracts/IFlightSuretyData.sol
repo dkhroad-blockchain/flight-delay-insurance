@@ -18,9 +18,9 @@ contract IFlightSuretyData {
     /********************************************************************************************/
     event AirlineRegistered(address indexed airline,string name, address indexed by);
     event AirlineFunded(address indexed airline,uint256 value);
-    event PolicyPurchased(address indexed customer, uint256 indexed policy, uint256 flight, uint256 timestamp);
+    event PolicyPurchased(address indexed customer, uint256 indexed policy, string flight, address airline,uint256 timestamp);
     event FlightStatusUpdated(address indexed airline,string flight,FlightStatus status,uint256 policy);
-    event FlightRegistered(address indexed airline,uint256 indexed flight,string name);
+    event FlightRegistered(address indexed airline,uint256 indexed flight,string name,uint256 timestamp);
     event InsuranceCredit(address indexed customer,uint256 payout,uint256 policy);
     event Payout(address indexed customer,uint256 amount);
 
@@ -48,13 +48,13 @@ contract IFlightSuretyData {
       * @param name  - flight name 
       * @param flightKey - unique key that represents this flight (keccak256 hash)
       */
-    function registerFlight (address airline,string calldata name,uint256 flightKey) external; 
+    function registerFlight (address airline,string calldata name,uint256 timestamp, uint256 policyKey, uint256 flightKey) external; 
 
    /**
     * @dev Buy insurance for a flight
     *
     */   
-    function buy(address customer, uint256 policyKey, uint256 flightKey,uint256 timestamp) external payable;
+    function buy(address customer, uint256 policyKey, uint256 flightKey) external payable;
     function setFlightStatus(uint256 policyKey,FlightStatus statusCode) external;
     function getFlightStatus(uint256 policyKey) external view returns(FlightStatus);
 

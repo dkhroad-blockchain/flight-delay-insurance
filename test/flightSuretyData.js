@@ -73,34 +73,37 @@ contract('Flight Surety Data Tests', async (accounts) => {
       });
 
       it("cannot register a flight", async () => {
+        let timestamp =  Math.floor(Date.now() / 1000); 
         await expectRevert(
           this.flightSuretyData.registerFlight(
             this.accounts[1],
             "UA256",
-            web3.utils.keccak256("UA256")),
+            timestamp,
+            web3.utils.soliditySha3(this.accounts[1],"UA256",timestamp),
+            web3.utils.soliditySha3(this.accounts[1],"UA256")),
           "Pausable: paused"
         );
       });
 
       it("cannot set a flight status", async () => {
         let timestamp =  Math.floor(Date.now() / 1000); 
-        let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
+        let policyKey = web3.utils.soliditySha3(this.accounts[1],"Detla",timestamp);
         await expectRevert(
-          this.flightSuretyData.setFlightStatus(policy,this.flightStatus.STATUS_CODE_LATE_AIRLINE),
+          this.flightSuretyData.setFlightStatus(policyKey,this.flightStatus.STATUS_CODE_LATE_AIRLINE),
           "Pausable: paused"
         );
       });
 
       it("cannot buy insurance", async () => {
-        let flight =  web3.utils.keccak256("UA256")
+        // let flight =  web3.utils.keccak256("UA256")
+        let flight =  web3.utils.soliditySha3(this.accounts[2],"UA256")
         let timestamp =  Math.floor(Date.now() / 1000); 
-        let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
+        let policyKey = web3.utils.soliditySha3(this.accounts[1],"UA256",timestamp);
         await expectRevert(
           this.flightSuretyData.buy(
             this.accounts[2],
-            policy,
+            policyKey,
             flight,
-            timestamp,
             {
               value: web3.utils.toWei("1","ether"),
               from: this.accounts[2]
@@ -111,11 +114,11 @@ contract('Flight Surety Data Tests', async (accounts) => {
       });
 
       it("cannot credit insurees", async () => {
-        let flight =  web3.utils.keccak256("UA256")
+        let flight =  web3.utils.soliditySha3(this.accounts[2],"UA256")
         let timestamp =  Math.floor(Date.now() / 1000); 
-        let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
+        let = policyKey = web3.utils.soliditySha3(this.accounts[1],"Delta",timestamp);
         await expectRevert(
-          this.flightSuretyData.creditInsurees(policy,this.flightStatus.STATUS_CODE_LATE_AIRLINE,200),
+          this.flightSuretyData.creditInsurees(policyKey,this.flightStatus.STATUS_CODE_LATE_AIRLINE,200),
           "Pausable: paused"
         );
       })
@@ -147,34 +150,38 @@ contract('Flight Surety Data Tests', async (accounts) => {
     });
 
     it("cannot register a flight", async () => {
+      let flight =  web3.utils.soliditySha3(this.accounts[2],"UA256")
+      let timestamp =  Math.floor(Date.now() / 1000); 
+      let = policyKey = web3.utils.soliditySha3(this.accounts[1],"Delta",timestamp);
       await expectRevert(
         this.flightSuretyData.registerFlight(
         this.accounts[1],
         "UA256",
-          web3.utils.keccak256("UA256")),
+        timestamp,
+        policyKey,
+        web3.utils.soliditySha3(this.accounts[1],"UA256")),
         "Calling contract is not authorized"
       );
     });
 
     it("cannot set a flight status", async () => {
       let timestamp =  Math.floor(Date.now() / 1000); 
-      let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
+      let policyKey = web3.utils.soliditySha3(this.accounts[1],"Delta",timestamp);
       await expectRevert(
-        this.flightSuretyData.setFlightStatus(policy,this.flightStatus.STATUS_CODE_LATE_AIRLINE),
+        this.flightSuretyData.setFlightStatus(policyKey,this.flightStatus.STATUS_CODE_LATE_AIRLINE),
         "Calling contract is not authorized"
       );
     });
 
     it("cannot buy insurance", async () => {
-      let flight =  web3.utils.keccak256("UA256")
+      let flight =  web3.utils.soliditySha3(this.accounts[1],"UA256")
       let timestamp =  Math.floor(Date.now() / 1000); 
-      let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
+      let policyKey = web3.utils.soliditySha3(this.accounts[1],"Delta",timestamp);
       await expectRevert(
         this.flightSuretyData.buy(
           this.accounts[2],
-          policy,
+          policyKey,
           flight,
-          timestamp,
           {
             value: web3.utils.toWei("1","ether"),
             from: this.accounts[2]
@@ -185,11 +192,11 @@ contract('Flight Surety Data Tests', async (accounts) => {
     });
 
     it("cannot credit insurees", async () => {
-      let flight =  web3.utils.keccak256("UA256")
+      let flight =  web3.utils.soliditySha3(this.accounts[1],"UA256")
       let timestamp =  Math.floor(Date.now() / 1000); 
-      let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
+      let policyKey = web3.utils.soliditySha3(this.accounts[1],"UA256",timestamp);
       await expectRevert(
-        this.flightSuretyData.creditInsurees(policy,2,2),
+        this.flightSuretyData.creditInsurees(policyKey,2,2),
         "Calling contract is not authorized"
       );
     })
@@ -213,14 +220,19 @@ contract('Flight Surety Data Tests', async (accounts) => {
   describe("when authorized", async () => {
     let airlineName = "United";
     let flightName = "UA256";
-    let flightKey =  web3.utils.keccak256(flightName)
+    // let flightKey =  web3.utils.keccak256(flightName)
     let timestamp =  Math.floor(Date.now() / 1000); 
-    let policy = web3.utils.keccak256(airlineName+flightName+ timestamp);
+    let flightKey;
+    let policyKey; 
+    // let policy = web3.utils.keccak256(airlineName+flightName+ timestamp);
     before(async () => { 
       this.flightSuretyData.authorizeContract(this.accounts[0]);
       this.flightSuretyData.authorizeContract(this.accounts[1]);
       this.flightSuretyData.authorizeContract(this.accounts[2]);
       this.flightSuretyData.authorizeContract(this.accounts[3]);
+      flightKey =  web3.utils.soliditySha3(this.accounts[1],flightName);
+      policyKey = web3.utils.soliditySha3(this.accounts[1],flightName,timestamp);
+
     });
 
     it("can register an airline", async () => {
@@ -230,7 +242,13 @@ contract('Flight Surety Data Tests', async (accounts) => {
 
 
     it("can register a flight", async () => {
-      let tx =await this.flightSuretyData.registerFlight( this.accounts[1],flightName, flightKey);
+      let tx =await this.flightSuretyData.registerFlight( 
+        this.accounts[1],
+        flightName, 
+        timestamp,
+        policyKey,
+        flightKey
+      );
       expectEvent.inLogs(
         tx.logs,
         "FlightRegistered",
@@ -248,7 +266,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
       // });
 
     it("can buy flight insurance", async () => {
-      let tx = await this.flightSuretyData.buy(this.accounts[2],policy,flightKey,timestamp,
+      let tx = await this.flightSuretyData.buy(this.accounts[2],policyKey,flightKey,
         {
           value: web3.utils.toWei("1","ether"),
           from: this.accounts[2]
@@ -258,13 +276,14 @@ contract('Flight Surety Data Tests', async (accounts) => {
         "PolicyPurchased",
         { 
           customer: this.accounts[2],
-          policy: web3.utils.toBN(policy).toString(),
-          flight: web3.utils.toBN(flightKey).toString(),
+          policy: web3.utils.toBN(policyKey).toString(),
+          flight: "UA256",
+          airline: this.accounts[1],
           timestamp: web3.utils.toBN(timestamp).toString()
         }
       );
       // multiple customers can buy the the same policy
-      tx = await this.flightSuretyData.buy(this.accounts[3],policy,flightKey,timestamp,
+      tx = await this.flightSuretyData.buy(this.accounts[3],policyKey,flightKey,
         {
           value: web3.utils.toWei("1","ether"),
           from: this.accounts[2]
@@ -274,8 +293,8 @@ contract('Flight Surety Data Tests', async (accounts) => {
         "PolicyPurchased",
         { 
           customer: this.accounts[3],
-          policy: web3.utils.toBN(policy).toString(),
-          flight: web3.utils.toBN(flightKey).toString(),
+          policy: web3.utils.toBN(policyKey).toString(),
+          flight: "UA256",
           timestamp: web3.utils.toBN(timestamp).toString()
         }
       );
@@ -285,46 +304,47 @@ contract('Flight Surety Data Tests', async (accounts) => {
 
   
     it("cannot buy insurance on an unregistered flight",async () => {
-      let flight =  web3.utils.keccak256("UA257")
+      let flight =  web3.utils.soliditySha3(this.accounts[1],"UA255")
       let timestamp =  Math.floor(Date.now() / 1000); 
-      let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
+      let policyKey = web3.utils.soliditySha3(this.accounts[1],flightName,timestamp);
       await expectRevert(
-        this.flightSuretyData.buy(this.accounts[2],policy,flight,timestamp),
+        this.flightSuretyData.buy(this.accounts[2],policyKey,flight),
         "Unregistered flight"
       );
     });
 
 
-      it("cannot set flight status on a non existent policy", async () => {
-        let timestamp =  Math.floor(Date.now() / 1000); 
-        let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
-        await expectRevert(
-          this.flightSuretyData.setFlightStatus(policy,this.flightStatus.STATUS_CODE_LATE_AIRLINE),
-          "Non-existent policy."
-        );
+    it("cannot set flight status on a non existent policy", async () => {
+      let timestamp =  Math.floor(Date.now() / 1000); 
+      // let policy = web3.utils.keccak256("United"+"UA256"+ timestamp);
+      let policyKey = web3.utils.soliditySha3(this.accounts[1],flightName,timestamp);
+      await expectRevert(
+        this.flightSuretyData.setFlightStatus(policyKey,this.flightStatus.STATUS_CODE_LATE_AIRLINE),
+        "Non-existent policy."
+      );
+    });
+
+
+    it("can set/get a valid flight status on an existing policy", async () => {
+      let tx = await this.flightSuretyData.setFlightStatus(policyKey,this.flightStatus.STATUS_CODE_LATE_AIRLINE);
+      expectEvent.inLogs(tx.logs,"FlightStatusUpdated",{
+        policy: web3.utils.toBN(policyKey).toString(),
+        flight: "UA256",
+        status: web3.utils.toBN(this.flightStatus.STATUS_CODE_LATE_AIRLINE)
       });
 
+      let status = await this.flightSuretyData.getFlightStatus.call(policyKey); 
+      assert.equal(status.toString(),this.flightStatus.STATUS_CODE_LATE_AIRLINE.toString());
+    });
 
-      it("can set/get a valid flight status on an existing policy", async () => {
-        let tx = await this.flightSuretyData.setFlightStatus(policy,this.flightStatus.STATUS_CODE_LATE_AIRLINE);
-        expectEvent.inLogs(tx.logs,"FlightStatusUpdated",{
-          policy: web3.utils.toBN(policy).toString(),
-          flight: "UA256",
-          status: web3.utils.toBN(this.flightStatus.STATUS_CODE_LATE_AIRLINE)
-        });
-
-        let status = await this.flightSuretyData.getFlightStatus.call(policy); 
-        assert.equal(status.toString(),this.flightStatus.STATUS_CODE_LATE_AIRLINE.toString());
-      });
-
-      it("cannot set a invalid flight status on an existing policy", async () => {
-        // let tx = await this.flightSuretyData.setFlightStatus(policy,this.flightStatus.STATUS_CODE_ON_TIME);
-        // expectEvent.inLogs(tx.logs,"FlightStatusUpdated");
-        await expectRevert(
-          this.flightSuretyData.setFlightStatus(policy,this.flightStatus.STATUS_CODE_LATE_AIRLINE),
-          "Expired policy."
-        );
-      });
+    it("cannot set a invalid flight status on an existing policy", async () => {
+      // let tx = await this.flightSuretyData.setFlightStatus(policy,this.flightStatus.STATUS_CODE_ON_TIME);
+      // expectEvent.inLogs(tx.logs,"FlightStatusUpdated");
+      await expectRevert(
+        this.flightSuretyData.setFlightStatus(policyKey,this.flightStatus.STATUS_CODE_LATE_AIRLINE),
+        "Expired policy."
+      );
+    });
 
     describe("credit/pay", async () => {
       let payout = web3.utils.toWei("2","ether");
@@ -358,7 +378,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
       });
 
       it("can credit insureees",async () => {
-        tx = await this.flightSuretyData.creditInsurees(policy,this.flightStatus.STATUS_CODE_LATE_AIRLINE,200);
+        tx = await this.flightSuretyData.creditInsurees(policyKey,this.flightStatus.STATUS_CODE_LATE_AIRLINE,200);
         expectEvent.inLogs(tx.logs,"InsuranceCredit",{customer: this.accounts[2],payout: payout});
         expectEvent.inLogs(tx.logs,"InsuranceCredit",{customer: this.accounts[3],payout: payout});
       });
@@ -380,7 +400,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
         // the contract is not self-sufficient yet
         this.flightSuretyData.sendTransaction({value: web3.utils.toWei("4","ether"), from: this.accounts[8]});
 
-        await this.flightSuretyData.creditInsurees(policy,this.flightStatus.STATUS_CODE_LATE_AIRLINE,200);
+        await this.flightSuretyData.creditInsurees(policyKey,this.flightStatus.STATUS_CODE_LATE_AIRLINE,200);
         let balanceBefore2 = await weiToBN(this.accounts[2]); 
         let balanceBefore3 = await weiToBN(this.accounts[3]); 
 

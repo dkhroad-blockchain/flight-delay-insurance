@@ -25,7 +25,9 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         bool isRegistered;
         address airline;
         string name;
+        uint256 timestamp;
     }
+
     mapping(uint256 => Flight) private flights;
 
     struct Insurance {
@@ -36,8 +38,6 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     struct Policy {
         Insurance[] insuree;
         uint256 flight;
-        uint256 expectedTimestamp;  
-        uint256 actualTimestamp;  // provided by an Oracle
         FlightStatus statusCode;
     }
     
@@ -52,6 +52,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
 
     event Authorized(address indexed contractAddress);
     event DeAuthorized(address indexed contractAddress);
+    event InvalidPolicyKey(uint256 indexed key);
 
     /**
     * @dev Constructor
@@ -148,17 +149,21 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
 
     function registerFlight(
         address airline,
-        string calldata name,
-        uint256 flight
+        string calldata flightName,
+        uint256 timestamp,
+        uint256 policyKey,
+        uint256 flightKey
     ) 
         external
         whenNotPaused
         fromAuthorized
     { 
-        flights[flight].airline = airline;
-        flights[flight].isRegistered = true;
-        flights[flight].name = name;
-        emit FlightRegistered(airline,flight,name);
+        flights[flightKey].airline = airline;
+        flights[flightKey].isRegistered = true;
+        flights[flightKey].name = flightName;
+        flights[flightKey].timestamp = timestamp;
+        policies[policyKey].flight = flightKey;
+        emit FlightRegistered(airline,flightKey,flightName,timestamp);
     }
 
    /**
@@ -175,7 +180,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     *
     */   
 
-    function buy(address customer,uint256 policyKey,uint256 flightKey,uint256 timestamp)
+    function buy(address customer,uint256 policyKey,uint256 flightKey)
                             external
                             payable
                             whenNotPaused
@@ -186,18 +191,10 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         require(msg.value > 0,"No ether provided.");
         Policy storage policy = policies[policyKey];
 
-        require(policy.expectedTimestamp == 0 || 
-                policy.expectedTimestamp == timestamp,"Invalid policy");
         require(policy.flight == 0 || 
                 policy.flight == flightKey,"Invalid flight");
 
-        if (policy.expectedTimestamp == 0) {
-            policy.expectedTimestamp = timestamp;
-        }
-
-        if (policy.flight == 0) {
-            policy.flight = flightKey;
-        }
+        Flight memory flightInfo = flights[flightKey];
 
         Insurance memory insurance;
 
@@ -205,7 +202,13 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         insurance.price = msg.value;
 
         policies[policyKey].insuree.push(insurance);
-        emit PolicyPurchased(customer,policyKey,policy.flight,timestamp);
+        emit PolicyPurchased(
+            customer,
+            policyKey,
+            flightInfo.name,
+            flightInfo.airline,
+            flightInfo.timestamp
+        );
     }
 
     /** 
