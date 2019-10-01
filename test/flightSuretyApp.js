@@ -20,28 +20,13 @@ contract('Flight Surety App Tests', async (accounts) => {
   });
 
   beforeEach('setup contract', async () => {
-    // this.accounts = accounts;
-    // this.flightSuretyData = await FlightSuretyData.new();
-    // this.flightSuretyApp = await FlightSuretyApp.new(this.flightSuretyData.address);
 
     console.log("app contract balance: ", await web3.eth.getBalance(this.flightSuretyApp.address));
     console.log("data contract balance: ", await web3.eth.getBalance(this.flightSuretyData.address));
-    // await this.flightSuretyApp.setAirlineMinimumFunds(web3.utils.toWei("2","ether"));
-    // await this.flightSuretyData.authorizeContract(this.flightSuretyApp.address);
-    // await this.flightSuretyApp.bootstrap("A0",{value: web3.utils.toWei("2","ether")});
-
-    // this.flightSuretyApp.sendTransaction({value: web3.utils.toWei("15","ether"), from: this.accounts[9]});
-    // this.flightSuretyData.sendTransaction({value: web3.utils.toWei("15","ether"), from: this.accounts[9]});
-    // await this.flightSuretyApp.registerAirline(this.accounts[0],"A1");      
-    // await this.flightSuretyApp.fund(this.accounts[0],{value: web3.utils.toWei("2","ether")});
   });
 
 
   describe("as a non-authorized contract", async () => {
-    // beforeEach(async () => {
-    //   await this.flightSuretyData.deAuthorizeContract(this.flightSuretyApp.address);
-    //   await this.flightSuretyData.authorizeContract(this.accounts[5]);
-    // });
 
     it("cannot call functions in data contract", async () => {
       let newAirline = this.accounts[2];
@@ -105,18 +90,6 @@ contract('Flight Surety App Tests', async (accounts) => {
       describe('when 5 or more airlines are registered', async () => {
         it("requires 50% of funded airlines to register a new airline", async () => {
           let tx;
-
-          // tx = await this.flightSuretyApp.registerAirline(this.accounts[1],"A1");
-          // expectEvent.inLogs(tx.logs,"AirlineRegistered",{airline: this.accounts[1]});
-
-          // tx = await this.flightSuretyApp.fund(this.accounts[1], { 
-          //   value: web3.utils.toWei("2","ether"), 
-          //   from: this.accounts[1] 
-          // });
-          // expectEvent.inLogs(tx.logs,"AirlineFunded",{airline: this.accounts[1]});
-
-          // tx = await this.flightSuretyApp.registerAirline(this.accounts[2],"A2");
-          // expectEvent.inLogs(tx.logs,"AirlineRegistered",{airline: this.accounts[2]});
 
           tx = await this.flightSuretyApp.fund(this.accounts[2], { 
             value: web3.utils.toWei("2","ether"), 

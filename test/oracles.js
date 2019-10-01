@@ -55,10 +55,11 @@ contract('Oracles', async (accounts) => {
       let minResponses = await this.flightSuretyOracle.MIN_RESPONSES.call();
       let goodResponses = 0;
       console.log(minResponses.toString());
-      let tx = await this.flightSuretyOracle.registerFlight(this.accounts[0],flight);
+      let tx = await this.flightSuretyOracle.registerFlight(this.accounts[0],flight,timestamp);
       expectEvent.inLogs(tx.logs,"FlightRegistered",{airline: this.accounts[0],name: flight});
 
       tx = await this.flightSuretyOracle.buy(
+        this.accounts[0],
         flight,
         timestamp,
         {
@@ -116,10 +117,11 @@ contract('Oracles', async (accounts) => {
       let flight = 'AA125';
       let timestamp = Math.floor(Date.now() / 1000);
 
-      let tx = await this.flightSuretyOracle.registerFlight(this.accounts[0],flight);
+      let tx = await this.flightSuretyOracle.registerFlight(this.accounts[0],flight,timestamp);
       expectEvent.inLogs(tx.logs,"FlightRegistered",{airline: this.accounts[0],name: flight});
 
       tx = await this.flightSuretyOracle.buy(
+        this.accounts[0],
         flight,
         timestamp,
         {

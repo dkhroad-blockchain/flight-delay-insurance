@@ -12,6 +12,14 @@ function toEther(value) {
   return web3.utils.fromWei(value,"ether");
 }
 
+function flightKey(airline,flightName) {
+  return web3.utils.soliditySha3(this.accounts[1],"UA256")
+}
+
+function policyKey(airline,flightName,timestamp) {
+  return web3.utils.soliditySha3(this.accounts[1],"UA256",timestamp)
+}
+
 contract('Flight Surety App flight Tests', async (accounts) => {
   before(async () =>  {
     this.accounts = accounts;
@@ -29,7 +37,9 @@ contract('Flight Surety App flight Tests', async (accounts) => {
   });
 
   describe('when not paused', async () => {
-  
+    let flightName = 'UA256';
+    let timestamp = Math.floor(Date.now() / 1000);
+    
     describe('airlne registered', async () => {
       before(async () =>  {
           await this.flightSuretyApp.registerAirline(this.accounts[1],"A1");
@@ -37,21 +47,22 @@ contract('Flight Surety App flight Tests', async (accounts) => {
       });
 
       it('can register a flight', async () => {
-        let tx = await this.flightSuretyApp.registerFlight(this.accounts[1],"UA256", {from: this.accounts[1]});
+        let tx = await this.flightSuretyApp.registerFlight(this.accounts[1],"UA256",timestamp, {from: this.accounts[1]});
+        console.log(tx);
         expectEvent.inLogs(tx.logs,"FlightRegistered",{airline: this.accounts[1],name: "UA256"});
       });
 
       describe('when flight registered', async () => {
         let ts = Math.floor(Date.now()/1000);
         it('can buy insurance for multiple customers',async () => {
-          let tx = await this.flightSuretyApp.buy("UA256",ts, {from: this.accounts[2], value: fromEther("1")});
+          let tx = await this.flightSuretyApp.buy(this.accounts[1],"UA256",timestamp, {from: this.accounts[2], value: fromEther("1")});
           expectEvent.inLogs(tx.logs,"PolicyPurchased",{customer: this.accounts[2]});
         });
 
 
         it('has insurance price ceiling',async () => {
           await expectRevert(
-             this.flightSuretyApp.buy("UA256",ts, {from: this.accounts[3], value: fromEther("2")}),
+             this.flightSuretyApp.buy(this.accounts[1],"UA256",ts, {from: this.accounts[3], value: fromEther("2")}),
             "Max allowable insurance price exceeded"
           );
         });
@@ -77,8 +88,8 @@ contract('Flight Surety App flight Tests', async (accounts) => {
         it('can credit funds to insurees', async () => {
           let ts = Math.floor(Date.now()/1000);
           let flight = "DL123"
-          let tx = await this.flightSuretyApp.registerFlight(this.accounts[1],flight, {from: this.accounts[1]});
-          tx = await this.flightSuretyApp.buy(flight,ts, {from: this.accounts[2], value: fromEther("1")});
+          let tx = await this.flightSuretyApp.registerFlight(this.accounts[1],flight,ts, {from: this.accounts[1]});
+          tx = await this.flightSuretyApp.buy(this.accounts[1],flight,ts, {from: this.accounts[2], value: fromEther("1")});
           tx = await this.flightSuretyApp.setFlightStatus(this.accounts[1],flight,ts,STATUS_CODE_LATE_AIRLINE);
           expectEvent.inLogs(tx.logs,'FlightStatusUpdated',
             {
@@ -121,16 +132,36 @@ contract('Flight Surety App flight Tests', async (accounts) => {
     });
 
     describe('when a flight is not registered', async () => {
-        it('cannot buy insurance', async () => {
-        });
-        it('can not set flight status', async () => {
-        });
-        it('can not credit insuree', async () => {
-        });
-        it('can not pay funds to insurees', async () => {
-          let tx = this.flightSuretyApp.pay({from: accounts[3]});
-          await expectRevert(tx,"No payout balance.");
-        });
+      before(async () =>  {
+        await this.flightSuretyApp.registerAirline(this.accounts[2],"A2");
+        await this.flightSuretyApp.fund(this.accounts[2],{from: this.accounts[2], value: fromEther("2")});
+      });
+
+      it('cannot buy insurance', async () => {
+        let ts = Math.floor(Date.now()/1000);
+        // let tx = await this.flightSuretyApp.buy(this.accounts[1],"A256",ts, {from: this.accounts[2], value: fromEther("1")});
+        await expectRevert(
+          this.flightSuretyApp.buy(this.accounts[1],"A256",ts, {from: this.accounts[2], value: fromEther("1")}),
+          'Unregistered flight or airline.'
+        );
+      });
+
+
+      it('can not set flight status', async () => {
+        let ts = Math.floor(Date.now()/1000);
+        await expectRevert(
+          this.flightSuretyApp.setFlightStatus(this.accounts[1],"A256",ts,STATUS_CODE_ON_TIME),
+          'Non-existent policy.'
+        );
+      });
+
+      it('can not credit insuree', async () => {
+      });
+
+      it('can not pay funds to insurees', async () => {
+        let tx = this.flightSuretyApp.pay({from: accounts[3]});
+        await expectRevert(tx,"No payout balance.");
+      });
     })
 
     describe('airline not registered', async () => {

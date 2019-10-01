@@ -37,9 +37,9 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
     /* events forwarded from the data contract */
     event AirlineRegistered(address indexed airline, string name, address indexed by);
     event AirlineFunded(address indexed airline,uint256 value);
-    event PolicyPurchased(address indexed customer, uint256 indexed policy, uint256 flight, uint256 timestamp);
+    event FlightRegistered(address indexed airline,uint256 indexed flight,string name,uint256 timestamp);
+    event PolicyPurchased(address indexed customer, uint256 indexed policy, string flight, address airline,uint256 timestamp);
     event FlightStatusUpdated(address indexed airline,string flight,IFlightSuretyData.FlightStatus status,uint256 policy);
-    event FlightRegistered(address indexed airline,uint256 indexed flight,string name);
     event Payout(address indexed customer,uint256 amount);
     event InsuranceCredit(address indexed customer,uint256 payout,uint256 policy);
 
@@ -202,25 +202,27 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
     */  
     function registerFlight(
         address airline,
-        string calldata flightName
+        string calldata flightName,
+        uint256 timestamp
     ) 
         external
         whenNotPaused
         onlyOwnerAirline(airline)
-        onlySigner
+        onlySigner // signer means caller is a registered and funded airline
     {
-        uint256 key = uint256(keccak256(abi.encodePacked(flightName)));
-        address airlineForFlight = flightSuretyDataContract.getAirline(key);
+        uint256 flightKey = getFlightKey(airline,flightName); 
+        address airlineForFlight = flightSuretyDataContract.getAirline(flightKey);
+        require(airlineForFlight == address(0x0),"Airline is already registered");
 
         // check for flight names collusion. 
         // should not happen if all flight names are prefixed with the flight name (e.g. UA256)
-        require(airlineForFlight == address(0x0),"Airline is already registered");
-
-        flightSuretyDataContract.registerFlight(airline,flightName,key);
+        uint256 key = getPolicyKey(airline,flightName,timestamp);
+        flightSuretyDataContract.registerFlight(airline,flightName,timestamp,key,flightKey);
     }
 
     function buy(
-        string calldata flight,
+        address airline,
+        string calldata flightName,
         uint256 timestamp
     )
         external
@@ -229,14 +231,19 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
     {
         //TODO: make max price configurable.
         require(msg.value <= 1 ether,"Max allowable insurance price exceeded"); 
-        uint256 flightKey = getFlightKey(flight);
-        address airline = flightSuretyDataContract.getAirline(flightKey);
-        require(airline != address(0x0),"Unregistered flight");
+        uint256 flightKey = getFlightKey(airline,flightName);
+        address registeredAirline = flightSuretyDataContract.getAirline(flightKey);
+        require(registeredAirline != address(0x0),"Unregistered flight or airline");
         require(airline != msg.sender,"Cannot buy insurance on your own flight");
         address customer = msg.sender;
 
-        uint256 policyKey = getPolicyKey(airline,flight,timestamp);
-        flightSuretyDataContract.buy.value(msg.value)(customer,policyKey,flightKey,timestamp);
+        uint256 policyKey = getPolicyKey(airline,flightName,timestamp);
+
+        flightSuretyDataContract.buy.value(msg.value)(
+            customer,
+            policyKey,
+            flightKey
+        );
     }
 
 
@@ -249,8 +256,8 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
         flightSuretyDataContract.pay(msg.sender);
     }
 
-    function getFlightKey(string memory flight) pure internal returns(uint256) {
-        return uint256(keccak256(abi.encodePacked(flight)));
+    function getFlightKey(address airline,string memory flight) pure internal returns(uint256) {
+        return uint256(keccak256(abi.encodePacked(airline,flight)));
     }
     
     function getPolicyKey(
