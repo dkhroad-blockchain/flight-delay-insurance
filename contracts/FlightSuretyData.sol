@@ -163,7 +163,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         flights[flightKey].name = flightName;
         flights[flightKey].timestamp = timestamp;
         policies[policyKey].flight = flightKey;
-        emit FlightRegistered(airline,flightKey,flightName,timestamp);
+        emit FlightRegistered(airline,flightName,timestamp);
     }
 
    /**

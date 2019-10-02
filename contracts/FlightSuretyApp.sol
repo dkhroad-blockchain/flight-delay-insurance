@@ -37,7 +37,7 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
     /* events forwarded from the data contract */
     event AirlineRegistered(address indexed airline, string name, address indexed by);
     event AirlineFunded(address indexed airline,uint256 value);
-    event FlightRegistered(address indexed airline,uint256 indexed flight,string name,uint256 timestamp);
+    event FlightRegistered(address indexed airline,string name,uint256 timestamp);
     event PolicyPurchased(address indexed customer, uint256 indexed policy, string flight, address airline,uint256 timestamp);
     event FlightStatusUpdated(address indexed airline,string flight,IFlightSuretyData.FlightStatus status,uint256 policy);
     event Payout(address indexed customer,uint256 amount);
