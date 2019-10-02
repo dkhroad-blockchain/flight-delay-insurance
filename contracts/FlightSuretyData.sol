@@ -204,7 +204,6 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         policies[policyKey].insuree.push(insurance);
         emit PolicyPurchased(
             customer,
-            policyKey,
             flightInfo.name,
             flightInfo.airline,
             flightInfo.timestamp
