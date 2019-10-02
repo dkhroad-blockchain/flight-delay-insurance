@@ -47,7 +47,7 @@ const Events = ({ready,events}) => {
     }
 
 }
-const Home = ({appEvents,ready,dataEvents,accounts,status}) =>  {
+const Home = ({appEvents,ready,dataEvents,forAirlines,forCustomers,status}) =>  {
   const showEvents = () => {
     console.log(appEvents);
   }
@@ -65,8 +65,10 @@ const Home = ({appEvents,ready,dataEvents,accounts,status}) =>  {
   const headerRow = ['Event','Transaction ID','Details'];
   return (
     <Container>
-      <Header as='h3'>Accounts</Header>
-      <Account ready={ready} accounts={accounts} />
+      <Header as='h3'>Accounts (for airlines)</Header>
+      <Account ready={ready} accounts={forAirlines} />
+      <Header as='h3'>Accounts (for customers)</Header>
+      <Account ready={ready} accounts={forCustomers} />
       <Header as='h3'>Status</Header>
       <Status status={status} />
       <Header as='h3'>App Events</Header>

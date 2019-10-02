@@ -23,13 +23,13 @@ const BuyForm = ({
   flightTime,
 
   customers,
+  buyer,
   onBuyerError,
   handleBuyerChange,
 
 }) =>  {
 
   const selectOptions = (options) => {
-    console.log('in selectOptions', options);
     const o =  (options || []).map(a => {
       var obj;
       obj = { text: a, value: a }
@@ -85,7 +85,7 @@ const BuyForm = ({
           <Form.Select 
             required
             label='Buyer'
-            value={customers}
+            value={buyer}
             error={onBuyerError}
             placeholder="Buyer's Wallet Address"
             options={selectOptions(customers)}

@@ -61,7 +61,10 @@ const airlineRegistrationFee = async () => {
 const fundAirline = async (airline,funds) => {
   const {fund} = flightSuretyApp.methods;
   const status = await fund(airline)
-    .send({from: airline, value: web3.utils.toWei(funds,'ether')});
+    .send({
+      from: airline, 
+      value: web3.utils.toWei(funds,'ether')
+    });
   return status;
 }
 
@@ -69,6 +72,16 @@ const registerFlight = async (airline,flight,timestamp) => {
   const {registerFlight} = flightSuretyApp.methods;
   const status = await registerFlight(airline,flight,timestamp)
     .send({from: airline});
+  return status;
+}
+
+const buy = async (airline,flight,timestamp,funds,caller) => {
+  const {buy} = flightSuretyApp.methods;
+  const status = await buy(airline,flight,timestamp)
+    .send({
+      from: caller, 
+      value: web3.utils.toWei(funds,'ether')
+    });
   return status;
 }
 
@@ -80,4 +93,5 @@ export default {
   airlineRegistrationFee,
   fundAirline,
   registerFlight,
+  buy,
 }

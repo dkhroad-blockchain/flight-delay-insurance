@@ -106,7 +106,6 @@ const Flight = ({
   const format = (flightInfo) => {
     if (flightInfo.length > 1) {
       let ts = flightInfo[0].timestamp;
-      console.log('ts',ts,moment(ts*1000).fromNow());
     }
     return flightInfo.map(f => Object.assign({},f,{timestamp: moment(f.timestamp*1000).format('lll')}));
   }

@@ -30,13 +30,16 @@ const App = () => {
   const [appEvents,setAppEvents] = useState([]);
   const [dataEvents,setDataEvents] = useState([]);
   const [possibleAirlines,setPossibleAirlines] = useState([])
+  const [customers,setCustomers] = useState([]);
   const [registeredAirlines,setRegisterdAirlnes] = useState([]);
   const [fundedAirlines,setFundedAirlines] = useState([]);
   const [registeredFlights,setRegisteredFlights] = useState([]);
   const [errorMessage,setErrorMessage] = useState(null);
   const [infoMessage,setInfoMessage] = useState(null);
   const [accounts,setAccounts] = useState(null);
+  const [policies,setPolicies] = useState([]);
   const [airlineRegFee,setAirlineRegFee] = useState('');
+
 
   let regAirRef = useRef(registeredAirlines);
   let fundedAirRef = useRef(fundedAirlines);
@@ -51,7 +54,8 @@ const App = () => {
         const web3 = await Web3();
         const _accounts = await web3.eth.getAccounts();
         setAccounts(_accounts);
-        setPossibleAirlines(_accounts.slice(0,9));
+        setPossibleAirlines(_accounts.slice(0,6));
+        setCustomers(_accounts.slice(-4)); 
         const {contract,dataContract} =  await contractService.init();
         const regFee = await contractService.airlineRegistrationFee();
         setAirlineRegFee(web3.utils.fromWei(regFee,'ether').toString());
@@ -92,6 +96,9 @@ const App = () => {
       setRegisterdAirlnes(registeredOnly);
       setFundedAirlines(funded);
       setRegisteredFlights(regFlights);
+
+      const policies = filterEvents(pastEvents,'PolicyPurchased');
+      setPolicies(policies);
       console.log('already registeredAirlines',registeredOnly,funded);
       console.log('registerd flights',regFlights);
     })();
@@ -181,7 +188,15 @@ const App = () => {
           <NavBar />
           <Notification message={infoMessage} handleDismiss={setInfoMessage} />
           <ErrorNotification message={errorMessage} handleDismiss={setErrorMessage}/>
-          <Route exact path="/" render={() => <Home appEvents={appEvents} dataEvents={dataEvents} ready={web3Ready} accounts={accounts} status={dataContractStatus} /> } />
+          <Route exact path="/" render={() =>
+            <Home 
+              appEvents={appEvents} 
+              dataEvents={dataEvents} 
+              ready={web3Ready} 
+              forAirlines={possibleAirlines} 
+              forCustomers={customers}
+
+              status={dataContractStatus} /> } />
           <Route  
             path="/airlines" render={() => 
               <Airline 
@@ -210,6 +225,8 @@ const App = () => {
                 setErrorMessage={setErrorMessage} 
                 setInfoMessage={setInfoMessage}  
                 registeredFlights={registeredFlights}
+                customers={customers}
+                policies={policies}
               />
             }
           />
