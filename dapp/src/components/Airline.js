@@ -78,66 +78,66 @@ const Airline = ({
   return (
     <Container>
       <Header as='h2'>Airlines</Header>
-    <Grid columns={2} >
-  <Grid.Row>
-    <Grid.Column>
-      <RegisterAirlineForm 
-        availableAccounts={availableAccounts()}
-        fundedAirlines={fundedAirlines}
-        name={name}
-        address={address}
-        requester={requester}
-        handleNameChange={handleNameChange}
-        handleAddressChange={handleAddressChange}
-        handleRequesterChange={handleRequesterChange}
-        loading={loading}
-        onSubmit={handleAirlineRegistration}
-      />
-    </Grid.Column>
-  </Grid.Row>
-  <Grid.Row>
-    <Grid.Column>
-      <FundAirlineForm 
-        registeredAirlines={registeredAirlines}
-        address={airlineAddress}
-        amount={funds}
-        minRegFee={10}
-        handleAddressChange={handleAirlineAddressChange}
-        handleAmountChange={handleFundsChange}
-        loading={loading}
-        onSubmit={handleFundAirlineSubmit}
-      />
-    </Grid.Column>
-  </Grid.Row>
-  <Grid.Row>
-    <Grid.Column>
-      <Header as='h3'>Funded Airlines</Header>
-      <Segment>
-        { fundedAirlines.length > 0
-            ? 
-              <ul>
-                {fundedAirlines.map( a => <li key={'_' + Math.random().toString(36).substring(2,9)}>{a}</li> )}
-              </ul>
-            : <div>No accounts</div>
-        }
-      </Segment>
-    </Grid.Column>
-    </Grid.Row>
-  <Grid.Row>
-    <Grid.Column>
-      <Header as='h3'>Registered (but not funded) Airlines</Header>
-      <Segment>
-        { registeredAirlines.length > 0
-            ? 
-              <ul>
-                {registeredAirlines.map( a => <li key={'_' + Math.random().toString(36).substring(2,9)}>{a}</li> )}
-              </ul>
-            : <div>No Registered accounts</div>
-        }
-      </Segment>
-    </Grid.Column>
-    </Grid.Row>
-    </Grid>
+      <Grid columns={2} >
+        <Grid.Row>
+          <Grid.Column>
+            <RegisterAirlineForm 
+              availableAccounts={availableAccounts()}
+              fundedAirlines={fundedAirlines}
+              name={name}
+              address={address}
+              requester={requester}
+              handleNameChange={handleNameChange}
+              handleAddressChange={handleAddressChange}
+              handleRequesterChange={handleRequesterChange}
+              loading={loading}
+              onSubmit={handleAirlineRegistration}
+            />
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column>
+            <FundAirlineForm 
+              registeredAirlines={registeredAirlines}
+              address={airlineAddress}
+              amount={funds}
+              minRegFee={10}
+              handleAddressChange={handleAirlineAddressChange}
+              handleAmountChange={handleFundsChange}
+              loading={loading}
+              onSubmit={handleFundAirlineSubmit}
+            />
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column>
+            <Header as='h3'>Funded Airlines</Header>
+            <Segment>
+              { fundedAirlines.length > 0
+                  ? 
+                    <ul>
+                      {fundedAirlines.map( a => <li key={'_' + Math.random().toString(36).substring(2,9)}>{a}</li> )}
+                    </ul>
+                  : <div>No accounts</div>
+              }
+            </Segment>
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column>
+            <Header as='h3'>Registered (but not funded) Airlines</Header>
+            <Segment>
+              { registeredAirlines.length > 0
+                  ? 
+                    <ul>
+                      {registeredAirlines.map( a => <li key={'_' + Math.random().toString(36).substring(2,9)}>{a}</li> )}
+                    </ul>
+                  : <div>No Registered accounts</div>
+              }
+            </Segment>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
   </Container>
   );
 }

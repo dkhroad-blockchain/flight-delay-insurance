@@ -12,6 +12,7 @@ import {
 import { Header,Menu, Segment } from 'semantic-ui-react';
 import Home from './components/Home';
 import Airline from './components/Airline';
+import Flight from './components/Flight';
 import NavBar from './components/NavBar';
 import Notification, {ErrorNotification} from './components/Notification';
 import {filterEvents, processEvents} from './utils/events';
@@ -54,18 +55,9 @@ const App = () => {
         const status = await contractService.isDataContractOperational(_accounts[0]);
         setDataContractStatus(status);
 
-        // let pastEvents = await contract.getPastEvents( {fromBlock: 0});
-        // pastEvents = processEvents(pastEvents);
-        // setAppEvents(pastEvents);
         setWeb3Ready(true);
         setContractReady(true);
-        // pastEvents = await dataContract.getPastEvents( {fromBlock: 0});
-        // pastEvents = processEvents(pastEvents);
-        // setDataEvents(pastEvents);
 
-        // contract.events.allEvents({fromBlock: 0},handleAppWeb3Events);
-        // dataContract.events.AirlineRegistered({fromBlock: 0},handleRegisterAirlineEvent);
-        // dataContract.events.allEvents({}.handleDataWeb3Events);
         setInfoMessage('Application successfully connected to the blockchain');
       } catch(error) {
         alert('Failed to load web3, accounts, or contract. Check console for details');
@@ -77,6 +69,7 @@ const App = () => {
 
   },[]);
 
+  // this effect hook captures all data and app contract past events
   useEffect( () => {
     ( async () => { 
       console.log('runnin useEffect 2');
@@ -91,17 +84,16 @@ const App = () => {
       const registered = filterEvents(pastEvents,'AirlineRegistered');
       const funded = filterEvents(pastEvents,'AirlineFunded');
       const registeredOnly = registered.filter(account => -1 === funded.indexOf(account));
-      // let available = _accounts.filter(acc => -1 === registered.indexOf(acc));
-      // available = available.filter(acc => -1 === funded.index(acc));
 
       setRegisterdAirlnes(registeredOnly);
       setFundedAirlines(funded);
-      // setPossibleAirlines(available);
       console.log('already registeredAirlines',registeredOnly,funded);
     })();
     
   },[]);
 
+  // this effect hook set up callbacks for the future contract events
+  // in order to maintain an uptodate copy of the contract state.
   useEffect( () => {
     ( async () => { 
       console.log('runnin useEffect 3');
@@ -186,8 +178,17 @@ const App = () => {
                 fundedAirlines={fundedAirlines}
                 airlineRegFee={airlineRegFee}
               /> 
-              } 
-            />
+            } 
+          />
+          <Route
+            path="/flights" render={() => 
+              <Flight
+                setErrorMessage={setErrorMessage} 
+                setInfoMessage={setInfoMessage}  
+                airlines={fundedAirlines}
+              />
+            }
+          />
         </Router>
     </div>
   );

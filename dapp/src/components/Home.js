@@ -1,6 +1,6 @@
 import React from 'react';
-import {Container,Header,Segment} from 'semantic-ui-react';
-
+import {Container,Header,Segment,Grid} from 'semantic-ui-react';
+import {Table as EventsTable} from './Table';
 const Status = ({status}) => {
   return (
     <div> Data Contract Operations status:  {status ? "Ready" : "Paused" } </div>
@@ -52,23 +52,38 @@ const Home = ({appEvents,ready,dataEvents,accounts,status}) =>  {
     console.log(appEvents);
   }
 
+  const formatEvents = events => {
+    const fevents = events.map(e => {
+      let params = e.params.replace(/,/g,' ');
+      params = params.replace(/:/g,': ');
+      let txHash = e.txHash.substring(0,9) + '...' + e.txHash.substring(e.txHash.length - 8);
+      return ({event: e.event,txHash: txHash, params: params});
+    });
+    console.log('events',fevents);
+    return fevents;
+  }
+
+  const headerRow = ['Event','Transaction ID','Details'];
   return (
-  <Container>
-  <Header as='h3'>Accounts</Header>
-  <Account ready={ready} accounts={accounts} />
-  <Header as='h3'>Status</Header>
-  <Status status={status} />
-  <Header as='h3'>App Events</Header>
-  <Segment>
-   <Events ready={ready} events={appEvents} />
-  </Segment>
-  <Header as='h3'>Data Events</Header>
-  <Segment>
-   <Events ready={ready} events={dataEvents} />
-  </Segment>
-  <button onClick={showEvents}>ShowEvents</button>
-  </Container>
-  )
+    <Container>
+      <Header as='h3'>Accounts</Header>
+      <Account ready={ready} accounts={accounts} />
+      <Header as='h3'>Status</Header>
+      <Status status={status} />
+      <Header as='h3'>App Events</Header>
+        <EventsTable
+          header={['Event','Transaction ID','Details']}
+          body={formatEvents(appEvents)} 
+        /> 
+      <Header as='h3'>Data Events</Header>
+        <Container >
+        <EventsTable
+          header={['Event','Transaction ID','Details']}
+          body={formatEvents(dataEvents)} 
+        /> 
+        </Container>
+      </Container>
+  );
 
   }
 export default Home;

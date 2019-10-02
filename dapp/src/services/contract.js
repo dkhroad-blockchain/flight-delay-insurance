@@ -65,6 +65,13 @@ const fundAirline = async (airline,funds) => {
   return status;
 }
 
+const registerFlight = async (airline,flight,timestamp) => {
+  const {registerFlight} = flightSuretyApp.methods;
+  const status = await registerFlight(airline,flight,timestamp)
+    .send({from: airline});
+  return status;
+}
+
 
 export default { 
   init,
@@ -72,4 +79,5 @@ export default {
   registerAirline,
   airlineRegistrationFee,
   fundAirline,
+  registerFlight,
 }
