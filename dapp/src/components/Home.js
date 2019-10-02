@@ -59,7 +59,6 @@ const Home = ({appEvents,ready,dataEvents,accounts,status}) =>  {
       let txHash = e.txHash.substring(0,9) + '...' + e.txHash.substring(e.txHash.length - 8);
       return ({event: e.event,txHash: txHash, params: params});
     });
-    console.log('events',fevents);
     return fevents;
   }
 

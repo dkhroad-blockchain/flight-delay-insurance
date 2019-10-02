@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Header, Form} from 'semantic-ui-react';
+import {Container, Header, Form} from 'semantic-ui-react';
 
 
 const RegisterFlightForm = ({
@@ -62,8 +62,7 @@ const RegisterFlightForm = ({
 
           <Form.Button>Register</Form.Button>
       </Form>
-    </>
-
+  </>
   )
 }
 

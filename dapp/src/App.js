@@ -31,6 +31,7 @@ const App = () => {
   const [possibleAirlines,setPossibleAirlines] = useState([])
   const [registeredAirlines,setRegisterdAirlnes] = useState([]);
   const [fundedAirlines,setFundedAirlines] = useState([]);
+  const [registeredFlights,setRegisteredFlights] = useState([]);
   const [errorMessage,setErrorMessage] = useState(null);
   const [infoMessage,setInfoMessage] = useState(null);
   const [accounts,setAccounts] = useState(null);
@@ -40,6 +41,7 @@ const App = () => {
   let fundedAirRef = useRef(fundedAirlines);
   let appEventsRef = useRef(appEvents);
   let dataEventsRef = useRef(dataEvents);
+  let regFlightRef = useRef(registeredFlights);
 
   useEffect(  () => {
     const initWeb3 = async () => {
@@ -81,13 +83,16 @@ const App = () => {
       pastEvents = processEvents(pastEvents);
       setDataEvents(pastEvents);
 
-      const registered = filterEvents(pastEvents,'AirlineRegistered');
-      const funded = filterEvents(pastEvents,'AirlineFunded');
+      const registered = filterEvents(pastEvents,'AirlineRegistered','airline');
+      const funded = filterEvents(pastEvents,'AirlineFunded','airline');
       const registeredOnly = registered.filter(account => -1 === funded.indexOf(account));
+      const regFlights = filterEvents(pastEvents,'FlightRegistered');
 
       setRegisterdAirlnes(registeredOnly);
       setFundedAirlines(funded);
+      setRegisteredFlights(regFlights);
       console.log('already registeredAirlines',registeredOnly,funded);
+      console.log('registerd flights',regFlights);
     })();
     
   },[]);
@@ -108,6 +113,7 @@ const App = () => {
     fundedAirRef.current = fundedAirlines;
     appEventsRef.current = appEvents;
     dataEventsRef.current = dataEvents;
+    regFlightRef.current = registeredFlights;
   });
 
 
@@ -129,6 +135,7 @@ const App = () => {
       console.log('all dataEvents 1',newEvent);
       handleRegisterAirlineEvent(newEvent[0]);
       handleFundedAirlineEvent(newEvent[0]);
+      handleRegisterFlightEvent(newEvent[0]);
       // console.log('all dataEvents 2', dataEvents.concat(newEvent));
       setDataEvents(dataEventsRef.current.concat(newEvent));
       
@@ -155,6 +162,12 @@ const App = () => {
       console.log('airline registered event ',newEvent);
       const airline = JSON.parse(newEvent.params).airline;
       setRegisterdAirlnes(regAirRef.current.concat(airline));
+    }
+  }
+
+  const handleRegisterFlightEvent = newEvent => {
+    if (newEvent.event === 'FlightRegistered') {
+      setRegisteredFlights(regFlightRef.current.concat(JSON.parse(newEvent.params)));
     }
   }
 
@@ -186,6 +199,7 @@ const App = () => {
                 setErrorMessage={setErrorMessage} 
                 setInfoMessage={setInfoMessage}  
                 airlines={fundedAirlines}
+                registeredFlights={registeredFlights}
               />
             }
           />

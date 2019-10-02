@@ -21,12 +21,17 @@ export const processEvents = events => {
   return evts;
 }
 
-export const filterEvents = (events,theEvent) => {
+export const filterEvents = (events,theEvent,filterKey) => {
   // const evts = events.filter(e => e.event === th);
   events = Array.isArray(events) ? events : [events];
   const evts = events.reduce((acc,e) => {
     if (e.event === theEvent) {
-      return acc.concat(JSON.parse(e.params).airline);
+      if (filterKey) {
+        return acc.concat(JSON.parse(e.params).airline);
+      } else {
+        return acc.concat(JSON.parse(e.params));
+      }
+
     } else {
       return acc;
     }

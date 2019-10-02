@@ -1,7 +1,7 @@
 import React,{useState} from 'react';
 import RegisterFlightForm from './RegisterFlightForm';
 import {Container,Grid,Header} from 'semantic-ui-react';
-import { Table as FlightTable } from './Table';
+import { Table as FlightsTable } from './Table';
 import moment from 'moment';
 import contract from '../services/contract';
 
@@ -10,10 +10,11 @@ const Flight = ({
   setErrorMessage,
   setInfoMessage,
   airlines,
+  registeredFlights,
 }) => {
 
   const [loading,setLoading] = useState(false);
-  const [airlineAddress,setAirlineAddress] = useState(false)
+  const [airlineAddress,setAirlineAddress] = useState('')
   const [flightName,setFlightName] = useState('');
   const [airlineAddressError,setAirlineAddressError] = useState(null);
   const [dateError,setDateError] = useState(null);
@@ -66,13 +67,26 @@ const Flight = ({
   const onSubmit = async (event) => {
     event.preventDefault();
     try {
+      let formHasErrors=false;
       setLoading(true);
+
+      if (airlineAddress === '') {
+        onAirlineAddressError();
+        formHasErrors = true;
+      }
+
+
       const [dateValid,timestamp] = dateInSeconds();
       if (!dateValid) {
         console.log('date',dateValid,timestamp);
+        formHasErrors = true;
+      }
+
+      if (formHasErrors) {
         setLoading(false);
         return;
       }
+
       
       console.log('registerFlight CB',airlineAddress,flightName,timestamp);
       
@@ -87,8 +101,14 @@ const Flight = ({
       console.error(error);
       clearFormFields();
     }
+  }
 
-  
+  const format = (flightInfo) => {
+    if (flightInfo.length > 1) {
+      let ts = flightInfo[0].timestamp;
+      console.log('ts',ts,moment(ts*1000).fromNow());
+    }
+    return flightInfo.map(f => Object.assign({},f,{timestamp: moment(f.timestamp*1000).format('lll')}));
   }
 
   return (
@@ -111,8 +131,21 @@ const Flight = ({
             />
           </Grid.Column>
         </Grid.Row>
+        <Grid.Row>
+          <Grid.Column>
+            <hr />
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column>
+          <Header as="h3">Registered Flights</Header>
+      <FlightsTable 
+        header={['Airline','Flight Name','Date & Time']}
+        body={format(registeredFlights)}
+      />
+      </Grid.Column>
+      </Grid.Row>
       </Grid>
-      <FlightTable />
     </Container>
   );
 };

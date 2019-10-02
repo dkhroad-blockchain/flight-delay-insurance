@@ -1,7 +1,7 @@
 import React from 'react';
 import {Label,Menu,Table as SemTable } from 'semantic-ui-react';
 
-export const Table = ({header,body,breakAll}) => {
+export const Table = ({header,body}) => {
 
   const renderBodyRow = (body,i) => {
     return ({
