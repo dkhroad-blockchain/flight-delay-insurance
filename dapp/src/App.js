@@ -14,6 +14,7 @@ import Home from './components/Home';
 import Airline from './components/Airline';
 import Flight from './components/Flight';
 import NavBar from './components/NavBar';
+import Insurance from './components/Insurance.js';
 import Notification, {ErrorNotification} from './components/Notification';
 import {filterEvents, processEvents} from './utils/events';
 // import './App.css';
@@ -199,6 +200,15 @@ const App = () => {
                 setErrorMessage={setErrorMessage} 
                 setInfoMessage={setInfoMessage}  
                 airlines={fundedAirlines}
+                registeredFlights={registeredFlights}
+              />
+            }
+          />
+          <Route
+            path="/insurance" render={() => 
+              <Insurance
+                setErrorMessage={setErrorMessage} 
+                setInfoMessage={setInfoMessage}  
                 registeredFlights={registeredFlights}
               />
             }

@@ -36,6 +36,14 @@ const NavBar = () => {
           link as={Link} to='/flights'
         >
         </Menu.Item>
+        <Menu.Item 
+          name='insurance' 
+          content='Insurance'
+          active={activeItem === 'insurance'} 
+          onClick={handleItemClick}
+          link as={Link} to='/insurance'
+        >
+        </Menu.Item>
       </Menu>
     </Segment>
   );
