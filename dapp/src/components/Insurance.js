@@ -10,6 +10,7 @@ const Insurance = ({
   registeredFlights,
   customers,
   policies,
+  admin
 }) => {
   const [loading,setLoading] = useState(false);
   const [airlineAddress,setAirlineAddress] = useState('')
@@ -196,9 +197,17 @@ const Insurance = ({
 		return str
 	}
 
-  const handleRowClick = (airline,flight,timestamp) => {
-    // event.preventDefault();
-    console.log('Woohoo! row clicked',airline,flight,Math.floor(Date.parse(timestamp)/1000));
+  const handleRowClick = async (airline,flight,timestamp) => {
+    try {
+      timestamp = Math.floor(Date.parse(timestamp)/1000);
+      console.log('fetchFlightStatus request',airline,flight,timestamp,admin);
+      const status = await contract.fetchFlightStatus(airline,flight,timestamp,admin);
+      console.log('fetchFlightStatus status:', status);
+      setInfoMessage('Flight status request sent...');
+    } catch (error) {
+      setErrorMessage(error.message);
+      console.error(error);
+    }
   }
   const tableBodyRenderer = ({customer,airline,flight,timestamp,status},i) => {
       // cells: Object.values(body).map(v => formatAddress(v)),

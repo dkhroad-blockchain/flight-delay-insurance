@@ -85,6 +85,12 @@ const buy = async (airline,flight,timestamp,funds,caller) => {
   return status;
 }
 
+const fetchFlightStatus = async (airline,flight,timestamp,caller) => {
+  const {fetchFlightStatus} = flightSuretyApp.methods;
+  const status = await fetchFlightStatus(airline,flight,timestamp).send({from: caller});
+  return status;
+}
+
 
 export default { 
   init,
@@ -94,4 +100,5 @@ export default {
   fundAirline,
   registerFlight,
   buy,
+  fetchFlightStatus
 }

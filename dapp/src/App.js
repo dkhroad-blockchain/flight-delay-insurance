@@ -199,7 +199,6 @@ const App = () => {
 
 
 
-
   return (
     <div className="App">
         <Router>
@@ -245,6 +244,7 @@ const App = () => {
                 registeredFlights={registeredFlights}
                 customers={customers}
                 policies={policies}
+                admin={possibleAirlines[0]}
               />
             }
           />
