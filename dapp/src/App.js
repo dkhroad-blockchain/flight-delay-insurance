@@ -46,6 +46,7 @@ const App = () => {
   let appEventsRef = useRef(appEvents);
   let dataEventsRef = useRef(dataEvents);
   let regFlightRef = useRef(registeredFlights);
+  let policiesRef = useRef(policies);
 
   useEffect(  () => {
     const initWeb3 = async () => {
@@ -99,6 +100,7 @@ const App = () => {
 
       const policies = filterEvents(pastEvents,'PolicyPurchased');
       setPolicies(policies);
+      console.log('existing policees',policies);
       console.log('already registeredAirlines',registeredOnly,funded);
       console.log('registerd flights',regFlights);
     })();
@@ -122,6 +124,7 @@ const App = () => {
     appEventsRef.current = appEvents;
     dataEventsRef.current = dataEvents;
     regFlightRef.current = registeredFlights;
+    policiesRef.current = policies;
   });
 
 
@@ -144,6 +147,7 @@ const App = () => {
       handleRegisterAirlineEvent(newEvent[0]);
       handleFundedAirlineEvent(newEvent[0]);
       handleRegisterFlightEvent(newEvent[0]);
+      handlePolicyPurchasedEvent(newEvent[0]);
       // console.log('all dataEvents 2', dataEvents.concat(newEvent));
       setDataEvents(dataEventsRef.current.concat(newEvent));
       
@@ -177,6 +181,20 @@ const App = () => {
     if (newEvent.event === 'FlightRegistered') {
       setRegisteredFlights(regFlightRef.current.concat(JSON.parse(newEvent.params)));
     }
+  }
+
+  const handlePolicyPurchasedEvent = newEvent => {
+    if (newEvent.event === 'PolicyPurchased') {
+      // if an existing customer re-purchased. 
+      // update the existing entry instead of creating a new one
+
+      const params = JSON.parse(newEvent.params);
+      console.log('PolicyPurchased event', newEvent);
+      const policies = policiesRef.current.filter(p => p.customer != params.customer);
+      // setPolicies(policiesRef.current.concat(JSON.parse(newEvent.params)));
+      setPolicies(policies.concat(params));
+    }
+
   }
 
 

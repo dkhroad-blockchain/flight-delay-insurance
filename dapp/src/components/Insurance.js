@@ -45,12 +45,8 @@ const Insurance = ({
   const getTimeFor = (flight) => {
     const fl = flights.find(f => f.name === flight);
     return timestampToDate(fl ? fl.timestamp : '');
-    // if (fl) {
-    //   return new Date(Number(fl.timestamp) * 1000).toLocaleString();
-    // } else {
-    //   return new Date().toLocaleString();
-    // }
   }
+
   const handleFundAmountChange = event => setFundAmount(event.target.value);
 
   const onAirlineAddressError = ()  => {
@@ -88,7 +84,8 @@ const Insurance = ({
 
       const flight = flightFor(airlineAddress,flightName);
       console.log('in Insurance buy submit...',flight,buyer,fundAmount);
-      const status = contract.buy(flight.airline,flight.name,flight.timestamp,fundAmount,buyer);
+      const status = await contract.buy(flight.airline,flight.name,flight.timestamp,fundAmount,buyer);
+      console.log('buy status:',status);
 
       clearFormFields();
       setInfoMessage(`Insurance Policy for flight ${flightName} registerd successfully!`);
@@ -158,10 +155,70 @@ const Insurance = ({
   }
 
 
-  const formatPolicy = (policies) => 
-    policies.map(p => 
-      Object.assign({},p,{timestamp: timestampToDate(p.timestamp)}));
-    
+    /*
+        STATUS_CODE_UNKNOWN, 
+        STATUS_CODE_ON_TIME,
+        STATUS_CODE_LATE_AIRLINE,
+        STATUS_CODE_LATE_WEATHER,
+        STATUS_CODE_LATE_TECHNICAL,
+        STATUS_CODE_LATE_OTHER
+     */
+  const formatStatusCode = code =>  {
+    switch (code) {
+      case 0: 
+        return 'UNKNOWN';
+      case 1:
+        return 'ON_TIME';
+      case 2: 
+        return 'LATE_AIRLINE';
+      case 3: 
+        return 'LATE_WEATHER'
+      case 4:
+        return 'LATE_TECHNICAL'
+      case 5:
+        return 'LATE_OTHER'
+      default:
+        return 'UNKNOWN'
+    }
+  }
+
+  const formatPolicy = (policies) => { 
+    return policies.map(p => { 
+      return Object.assign({},p,{timestamp: timestampToDate(p.timestamp),status: formatStatusCode(p.status) })
+    });
+  }
+
+  
+  const formatAddress = (str) => {
+    if (str.startsWith('0x') && str.length > 40) {
+			return str.substring(0,9) + '...' + str.substring(str.length - 8)
+		}
+		return str
+	}
+
+  const handleRowClick = (airline,flight,timestamp) => {
+    // event.preventDefault();
+    console.log('Woohoo! row clicked',airline,flight,Math.floor(Date.parse(timestamp)/1000));
+  }
+  const tableBodyRenderer = ({customer,airline,flight,timestamp,status},i) => {
+      // cells: Object.values(body).map(v => formatAddress(v)),
+    const cells = 
+      ({
+        key: `row-${i}`,
+        onClick:  () => handleRowClick(airline,flight,timestamp), 
+        cells: [
+          formatAddress(customer),
+          formatAddress(airline),
+          flight,
+          {key: 'timestamp', singleLine: true,content: timestamp},
+          status
+        ]
+    });
+
+    return cells;
+  }
+
+
 
   return (
     <Container>
@@ -176,9 +233,15 @@ const Insurance = ({
         </Grid.Row>
         <Grid.Row>
           <Grid.Column>
+            <Header as='h3'>Purchased Policies</Header>
+            <small><i>Click on any cell below to get  flight status</i></small>
             <PolicyTable 
+              selectable
+              celled
+              striped={false}
               header={['Customer','Airline','Flight','Time','Status']}
               body={formatPolicy(policies)}
+              bodyRenderer={tableBodyRenderer}
             />
           </Grid.Column>
         </Grid.Row>
