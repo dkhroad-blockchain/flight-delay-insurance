@@ -52,7 +52,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
 
     event Authorized(address indexed contractAddress);
     event DeAuthorized(address indexed contractAddress);
-    event InvalidPolicyKey(uint256 indexed key);
+    
 
     /**
     * @dev Constructor
@@ -92,6 +92,12 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         _;
     }
 
+    /*
+    modifier validCustomer(uint256 key,address customer) {
+        require(hasCustomer(key,customer) == false,"Customer has already purchased this policy");
+        _;
+    }
+    */
 
 
     /********************************************************************************************/
@@ -116,6 +122,18 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     function isOperational() external view fromAuthorized returns(bool) {
         return !paused();
     }
+
+    /*
+    function hasCustomer(uint256 policyKey,address customer) private view returns(bool) {
+        Insurance[] memory insurees = policies[policyKey].insuree;
+        for (uint i=0; i < insurees.length; i++) {
+            if (insurees[i].customer == customer) {
+                return true;
+            }
+        }
+        return false;
+    }
+    */
 
    /**
     * @dev Add an airline to the registration queue
@@ -175,6 +193,8 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
     function getAirline(uint256 flight) external whenNotPaused fromAuthorized returns(address) {
         return flights[flight].airline; 
     }
+
+    
    /**
     * @dev Buy insurance for a flight
     *
@@ -204,10 +224,11 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
         policies[policyKey].insuree.push(insurance);
         emit PolicyPurchased(
             customer,
+            flightInfo.airline, 
             flightInfo.name,
-            flightInfo.airline,
-            flightInfo.timestamp
-        );
+            flightInfo.
+            timestamp,
+            policy.statusCode);
     }
 
     /** 
@@ -226,12 +247,11 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
        
         Policy memory policy = policies[policyKey];
         Flight memory flightInfo = flights[policy.flight];
-        
         emit FlightStatusUpdated(
             flightInfo.airline,
             flightInfo.name,
-            policy.statusCode,
-            policyKey
+            flightInfo.timestamp,
+            policies[policyKey].statusCode
         );
     }
 
@@ -275,7 +295,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
             uint256 payout = price.mul(multiple).div(100);
             address thisCustomer = insuree[i].customer;
             creditBalances[thisCustomer] = creditBalances[thisCustomer].add(payout);
-            emit InsuranceCredit(thisCustomer,payout,policyKey);
+            emit InsuranceCredit(thisCustomer,payout);
         }
     }
     

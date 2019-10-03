@@ -254,7 +254,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
         "FlightRegistered",
         { 
           airline: this.accounts[1],
-          flight: web3.utils.toBN(flightKey).toString(),
+          timestamp: web3.utils.toBN(timestamp).toString(),
           name:flightName
         }); 
       let airline = await this.flightSuretyData.getAirline.call(flightKey);
@@ -276,7 +276,6 @@ contract('Flight Surety Data Tests', async (accounts) => {
         "PolicyPurchased",
         { 
           customer: this.accounts[2],
-          policy: web3.utils.toBN(policyKey).toString(),
           flight: "UA256",
           airline: this.accounts[1],
           timestamp: web3.utils.toBN(timestamp).toString()
@@ -293,9 +292,10 @@ contract('Flight Surety Data Tests', async (accounts) => {
         "PolicyPurchased",
         { 
           customer: this.accounts[3],
-          policy: web3.utils.toBN(policyKey).toString(),
+          airline: this.accounts[1],
           flight: "UA256",
-          timestamp: web3.utils.toBN(timestamp).toString()
+          timestamp: web3.utils.toBN(timestamp).toString(),
+          status: web3.utils.toBN(0).toString()
         }
       );
     });
@@ -328,7 +328,6 @@ contract('Flight Surety Data Tests', async (accounts) => {
     it("can set/get a valid flight status on an existing policy", async () => {
       let tx = await this.flightSuretyData.setFlightStatus(policyKey,this.flightStatus.STATUS_CODE_LATE_AIRLINE);
       expectEvent.inLogs(tx.logs,"FlightStatusUpdated",{
-        policy: web3.utils.toBN(policyKey).toString(),
         flight: "UA256",
         status: web3.utils.toBN(this.flightStatus.STATUS_CODE_LATE_AIRLINE)
       });

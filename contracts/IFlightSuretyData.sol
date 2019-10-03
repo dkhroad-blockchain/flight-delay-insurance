@@ -18,10 +18,10 @@ contract IFlightSuretyData {
     /********************************************************************************************/
     event AirlineRegistered(address indexed airline,string name, address indexed by);
     event AirlineFunded(address indexed airline,uint256 value);
-    event PolicyPurchased(address indexed customer, string indexed flight, address airline,uint256 timestamp);
-    event FlightStatusUpdated(address indexed airline,string  flight,FlightStatus status,uint256 policy);
+    event PolicyPurchased(address indexed customer, address airline, string flight,uint256 timestamp,FlightStatus status);
+    event FlightStatusUpdated(address indexed airline,string flight,uint256 timestamp, FlightStatus status);
     event FlightRegistered(address indexed airline,string name,uint256 timestamp);
-    event InsuranceCredit(address indexed customer,uint256 payout,uint256 policy);
+    event InsuranceCredit(address indexed customer,uint256 payout);
     event Payout(address indexed customer,uint256 amount);
 
     /********************************************************************************************/
