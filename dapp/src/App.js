@@ -39,6 +39,8 @@ const App = () => {
   const [accounts,setAccounts] = useState(null);
   const [policies,setPolicies] = useState([]);
   const [airlineRegFee,setAirlineRegFee] = useState('');
+  const [oracleRequests,setOracleRequests] = useState([]);
+  const [oracleReports,setOracleReports] = useState([]);
 
 
   let regAirRef = useRef(registeredAirlines);
@@ -47,6 +49,7 @@ const App = () => {
   let dataEventsRef = useRef(dataEvents);
   let regFlightRef = useRef(registeredFlights);
   let policiesRef = useRef(policies);
+  let oracleReportsRef  = useRef(oracleReports);
 
   useEffect(  () => {
     const initWeb3 = async () => {
@@ -82,9 +85,15 @@ const App = () => {
     ( async () => { 
       console.log('runnin useEffect 2');
       const {contract,dataContract} = await contractService.init();
+
       let pastEvents = await contract.getPastEvents( {fromBlock: 0});
       pastEvents = processEvents(pastEvents);
       setAppEvents(pastEvents);
+      const oracleRequests = filterEvents(pastEvents,'OracleRequest');
+      setOracleRequests(oracleRequests);
+      const oracleReports = filterEvents(pastEvents,'OracleReport');
+      setOracleReports(oracleReports);
+
       pastEvents = await dataContract.getPastEvents( {fromBlock: 0});
       pastEvents = processEvents(pastEvents);
       setDataEvents(pastEvents);
@@ -100,6 +109,7 @@ const App = () => {
 
       const policies = filterEvents(pastEvents,'PolicyPurchased');
       setPolicies(policies);
+      oracleReports.forEach(report => updateFlightStatus(report));
       console.log('existing policees',policies);
       console.log('already registeredAirlines',registeredOnly,funded);
       console.log('registerd flights',regFlights);
@@ -125,6 +135,7 @@ const App = () => {
     dataEventsRef.current = dataEvents;
     regFlightRef.current = registeredFlights;
     policiesRef.current = policies;
+    oracleReportsRef.current = oracleReports;
   });
 
 
@@ -134,6 +145,7 @@ const App = () => {
     } else {
     
       const newEvent = processEvents([evt]);
+      handleOracleReportEvent(newEvent[0]);
       setAppEvents(appEventsRef.current.concat(newEvent));
     }
   }
@@ -183,12 +195,14 @@ const App = () => {
     }
   }
 
+
   const handlePolicyPurchasedEvent = newEvent => {
     if (newEvent.event === 'PolicyPurchased') {
       // if an existing customer re-purchased. 
       // update the existing entry instead of creating a new one
 
       const params = JSON.parse(newEvent.params);
+
       console.log('PolicyPurchased event', newEvent);
       const policies = policiesRef.current.filter(p => p.customer != params.customer);
       // setPolicies(policiesRef.current.concat(JSON.parse(newEvent.params)));
@@ -197,6 +211,30 @@ const App = () => {
 
   }
 
+  const updateFlightStatus = ({airline,flight,timestamp,status}) => {
+    console.log('updateFlightStatus',airline,flight,timestamp,status);
+    const policies = policiesRef.current.map(p => {
+      console.log('updateFlightStatus p',p.airline,p.flight,p.timestamp,p.status);
+      if (p.airline === airline && p.flight === flight && p.timestamp === timestamp) {
+        console.log('updating fligh status for flight',flight,status);
+        p.status = status;
+        return p;
+      } else {
+        return p;
+      }
+    });
+    console.log('setting policies',policies)
+    setPolicies(policies);
+  }
+
+  const handleOracleReportEvent = newEvent => {
+    if (newEvent.event === 'OracleReport') {
+      console.log('detected OracleReport event',newEvent);
+      const params = JSON.parse(newEvent.params);
+      setOracleReports(oracleReportsRef.current.concat(params));
+      updateFlightStatus(params);
+    }
+  }
 
 
   return (

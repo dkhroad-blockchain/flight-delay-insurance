@@ -74,6 +74,10 @@ const Insurance = ({
   const clearFormFields = () => {
     setAirlineAddressError(null)
     setAirlineAddress('');
+    setFlightName('');
+    setFundAmount('');
+    setFlightTime('');
+    setBuyer('');
     setLoading(false);
   }
 
@@ -156,38 +160,6 @@ const Insurance = ({
   }
 
 
-    /*
-        STATUS_CODE_UNKNOWN, 
-        STATUS_CODE_ON_TIME,
-        STATUS_CODE_LATE_AIRLINE,
-        STATUS_CODE_LATE_WEATHER,
-        STATUS_CODE_LATE_TECHNICAL,
-        STATUS_CODE_LATE_OTHER
-     */
-  const formatStatusCode = code =>  {
-    switch (code) {
-      case 0: 
-        return 'UNKNOWN';
-      case 1:
-        return 'ON_TIME';
-      case 2: 
-        return 'LATE_AIRLINE';
-      case 3: 
-        return 'LATE_WEATHER'
-      case 4:
-        return 'LATE_TECHNICAL'
-      case 5:
-        return 'LATE_OTHER'
-      default:
-        return 'UNKNOWN'
-    }
-  }
-
-  const formatPolicy = (policies) => { 
-    return policies.map(p => { 
-      return Object.assign({},p,{timestamp: timestampToDate(p.timestamp),status: formatStatusCode(p.status) })
-    });
-  }
 
   
   const formatAddress = (str) => {
@@ -199,7 +171,6 @@ const Insurance = ({
 
   const handleRowClick = async (airline,flight,timestamp) => {
     try {
-      timestamp = Math.floor(Date.parse(timestamp)/1000);
       console.log('fetchFlightStatus request',airline,flight,timestamp,admin);
       const status = await contract.fetchFlightStatus(airline,flight,timestamp,admin);
       console.log('fetchFlightStatus status:', status);
@@ -219,8 +190,9 @@ const Insurance = ({
           formatAddress(customer),
           formatAddress(airline),
           flight,
-          {key: 'timestamp', singleLine: true,content: timestamp},
+          {key: 'timestamp', singleLine: true,content: timestampToDate(timestamp)},
           status
+          
         ]
     });
 
@@ -249,7 +221,7 @@ const Insurance = ({
               celled
               striped={false}
               header={['Customer','Airline','Flight','Time','Status']}
-              body={formatPolicy(policies)}
+              body={policies}
               bodyRenderer={tableBodyRenderer}
             />
           </Grid.Column>
