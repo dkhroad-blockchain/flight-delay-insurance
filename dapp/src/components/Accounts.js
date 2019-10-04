@@ -27,7 +27,7 @@ const Account = ({ready,accounts}) => {
     }
 }
 
-const Home = ({appEvents,ready,dataEvents,forAirlines,forCustomers,status}) =>  {
+const Accounts = ({ready,forAirlines,forCustomers,status}) =>  {
 
 
   const headerRow = ['Event','Transaction ID','Details'];
@@ -43,4 +43,4 @@ const Home = ({appEvents,ready,dataEvents,forAirlines,forCustomers,status}) =>  
   );
 
   }
-export default Home;
+export default Accounts;

@@ -1,21 +1,26 @@
 import React, {useState} from 'react';
 import {Menu,Segment} from 'semantic-ui-react';
-import {Link} from 'react-router-dom';
+import {Link,withRouter} from 'react-router-dom';
 
-const NavBar = () => {
+const NavBar = ({match,location,history}) => {
 
-  const [activeItem,setActiveItem] = useState('home');
+  const [activeItem,setActiveItem] = useState('accounts');
   const handleItemClick = (e, { name}) => setActiveItem(name);
 
+  const ai =  location.pathname.split('/')[1];
+
+  if (ai !== activeItem) {
+    setActiveItem(ai);
+  }
 
   return (
     <Segment inverted>
       <Menu inverted pointing secondary> 
         <Menu.Item 
-          name='home' 
-          active={activeItem === 'home'} 
+          name='accounts' 
+          active={activeItem === 'accounts'} 
           onClick={handleItemClick}
-          content='Home'
+          content='Accounts'
           link as={Link} to='/' 
         >
         </Menu.Item>
@@ -56,4 +61,4 @@ const NavBar = () => {
   );
 }
 
-export default NavBar;
+export default withRouter(NavBar);

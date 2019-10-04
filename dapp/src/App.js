@@ -10,7 +10,7 @@ import {
 } from 'react-router-dom';
 
 import { Header,Menu, Segment } from 'semantic-ui-react';
-import Home from './components/Home';
+import Accounts from './components/Accounts';
 import Airline from './components/Airline';
 import Flight from './components/Flight';
 import NavBar from './components/NavBar';
@@ -245,9 +245,7 @@ const App = () => {
           <Notification message={infoMessage} handleDismiss={setInfoMessage} />
           <ErrorNotification message={errorMessage} handleDismiss={setErrorMessage}/>
           <Route exact path="/" render={() =>
-            <Home 
-              appEvents={appEvents} 
-              dataEvents={dataEvents} 
+            <Accounts 
               ready={web3Ready} 
               forAirlines={possibleAirlines} 
               forCustomers={customers}
