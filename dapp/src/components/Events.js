@@ -1,28 +1,52 @@
 import React from 'react';
-import {Item} from 'semantic-ui-react';
+import {Header, Container, Tab} from 'semantic-ui-react';
+import {Table as EventsTable} from './Table';
 
-export const Events = ({events}) => {
 
+const Events = ({events,header}) => {
 
-  const splitParams = params => {
-      params.split(',');
-  }
-  const renderEventItems = () => { 
-    return events.map(e => (
-      <Item 
-        key={'_' + Math.random().toString(36).substring(2,9)}
-        header={e.event}
-        meta={e.txHash}
-        content={e.params.replace(/,/g,' ')}
-      />
-    ));
+  const formatEvents = events => {
+    const fevents = events.map(e => {
+      let params = e.params.replace(/,/g,' ');
+      params = params.replace(/:/g,': ');
+      let txHash = e.txHash.substring(0,9) + '...' + e.txHash.substring(e.txHash.length - 8);
+      return ({event: e.event,txHash: txHash, params: params});
+    });
+    return fevents;
   }
 
   return (
-    <Item.Group divided>
-      {renderEventItems()}
-    </Item.Group>
+    <Container> 
+      <EventsTable
+        header={['Event','Transaction ID','Details']}
+        body={formatEvents(events)} 
+      /> 
+    </Container>
   );
 }
 
-export default Events;
+
+
+
+const EventTabs = ({appEvents,dataEvents}) => {
+  const eventPanes = [
+    {
+      menuItem: 'App Events', 
+      render: () => <Tab.Pane> <Events events={appEvents.reverse()}  /></Tab.Pane>
+    },
+    {
+      menuItem: 'Data Events',
+      render: () => <Tab.Pane> <Events events={dataEvents.reverse()}  /></Tab.Pane>
+    }
+
+  ];
+  return ( 
+    <Tab 
+      // menu={{ pointing: true}}
+      panes={eventPanes}
+    />
+  )
+}
+
+export default EventTabs;
+

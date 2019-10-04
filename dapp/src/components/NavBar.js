@@ -26,7 +26,6 @@ const NavBar = () => {
           onClick={handleItemClick}
           link as={Link} to='/airlines' 
         >
-          {/* <Link to="/airlines">Airlines</Link> */}
         </Menu.Item>
         <Menu.Item 
           name='flights' 
@@ -42,6 +41,14 @@ const NavBar = () => {
           active={activeItem === 'insurance'} 
           onClick={handleItemClick}
           link as={Link} to='/insurance'
+        >
+        </Menu.Item>
+        <Menu.Item 
+          name='events' 
+          content='Events'
+          active={activeItem === 'events'} 
+          onClick={handleItemClick}
+          link as={Link} to='/events'
         >
         </Menu.Item>
       </Menu>

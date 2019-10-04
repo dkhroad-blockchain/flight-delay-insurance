@@ -17,6 +17,7 @@ import NavBar from './components/NavBar';
 import Insurance from './components/Insurance.js';
 import Notification, {ErrorNotification} from './components/Notification';
 import {filterEvents, processEvents} from './utils/events';
+import EventTabs from './components/Events';
 // import './App.css';
 
 
@@ -286,6 +287,15 @@ const App = () => {
               />
             }
           />
+          <Route
+            path="/events" render={() => 
+              <EventTabs 
+                appEvents={appEvents}  
+                dataEvents={dataEvents}
+              />
+            }
+          />
+
         </Router>
     </div>
   );
