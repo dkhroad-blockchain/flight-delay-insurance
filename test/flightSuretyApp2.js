@@ -69,7 +69,7 @@ contract('Flight Surety App flight Tests', async (accounts) => {
 
         it('can set flight status', async () => {
           let tx = await this.flightSuretyApp.setFlightStatus(this.accounts[1],"UA256",ts,STATUS_CODE_ON_TIME);
-          expectEvent.inLogs(tx.logs,'FlightStatusUpdated',
+          expectEvent.inLogs(tx.logs,'FlightStatusUpdate',
             {
               airline: this.accounts[1], 
               flight: "UA256",
@@ -91,7 +91,7 @@ contract('Flight Surety App flight Tests', async (accounts) => {
           let tx = await this.flightSuretyApp.registerFlight(this.accounts[1],flight,ts, {from: this.accounts[1]});
           tx = await this.flightSuretyApp.buy(this.accounts[1],flight,ts, {from: this.accounts[2], value: fromEther("1")});
           tx = await this.flightSuretyApp.setFlightStatus(this.accounts[1],flight,ts,STATUS_CODE_LATE_AIRLINE);
-          expectEvent.inLogs(tx.logs,'FlightStatusUpdated',
+          expectEvent.inLogs(tx.logs,'FlightStatusUpdate',
             {
               airline: this.accounts[1], 
               flight: flight,

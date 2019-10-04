@@ -169,7 +169,7 @@ contract('Oracles', async (accounts) => {
           status: web3.utils.toBN(STATUS_CODE_ON_TIME)
         }
       );
-      expectEvent.inLogs(tx.logs,'FlightStatusUpdated',
+      expectEvent.inLogs(tx.logs,'FlightStatusUpdate',
         {
           airline: this.firstAirline, 
           flight: flight,

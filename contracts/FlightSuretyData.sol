@@ -247,7 +247,7 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
        
         Policy memory policy = policies[policyKey];
         Flight memory flightInfo = flights[policy.flight];
-        emit FlightStatusUpdated(
+        emit FlightStatusUpdate(
             flightInfo.airline,
             flightInfo.name,
             flightInfo.timestamp,

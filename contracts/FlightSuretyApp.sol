@@ -39,7 +39,7 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
     event AirlineFunded(address indexed airline,uint256 value);
     event FlightRegistered(address indexed airline,string name,uint256 timestamp);
     event PolicyPurchased(address indexed customer, address airline, string flight,uint256 timestamp,IFlightSuretyData.FlightStatus);
-    event FlightStatusUpdated(address indexed airline,string flight,uint256 timestamp,IFlightSuretyData.FlightStatus status);
+    event FlightStatusUpdate(address indexed airline,string flight,uint256 timestamp,IFlightSuretyData.FlightStatus status);
     event Payout(address indexed customer,uint256 amount);
     event InsuranceCredit(address indexed customer,uint256 payout);
 
@@ -271,6 +271,7 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
     {
         return uint256(keccak256(abi.encodePacked(airline, flight, timestamp)));
     }
+
    /**
     * @dev Called after oracle has updated flight status
     *

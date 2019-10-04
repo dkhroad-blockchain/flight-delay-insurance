@@ -327,7 +327,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
 
     it("can set/get a valid flight status on an existing policy", async () => {
       let tx = await this.flightSuretyData.setFlightStatus(policyKey,this.flightStatus.STATUS_CODE_LATE_AIRLINE);
-      expectEvent.inLogs(tx.logs,"FlightStatusUpdated",{
+      expectEvent.inLogs(tx.logs,"FlightStatusUpdate",{
         flight: "UA256",
         status: web3.utils.toBN(this.flightStatus.STATUS_CODE_LATE_AIRLINE)
       });
@@ -338,7 +338,7 @@ contract('Flight Surety Data Tests', async (accounts) => {
 
     it("cannot set a invalid flight status on an existing policy", async () => {
       // let tx = await this.flightSuretyData.setFlightStatus(policy,this.flightStatus.STATUS_CODE_ON_TIME);
-      // expectEvent.inLogs(tx.logs,"FlightStatusUpdated");
+      // expectEvent.inLogs(tx.logs,"FlightStatusUpdate");
       await expectRevert(
         this.flightSuretyData.setFlightStatus(policyKey,this.flightStatus.STATUS_CODE_LATE_AIRLINE),
         "Expired policy."
