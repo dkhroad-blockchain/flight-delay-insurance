@@ -213,24 +213,19 @@ const App = () => {
   }
 
   const updateFlightStatus = ({airline,flight,timestamp,status}) => {
-    console.log('updateFlightStatus',airline,flight,timestamp,status);
     const policies = policiesRef.current.map(p => {
-      console.log('updateFlightStatus p',p.airline,p.flight,p.timestamp,p.status);
       if (p.airline === airline && p.flight === flight && p.timestamp === timestamp) {
-        console.log('updating fligh status for flight',flight,status);
         p.status = status;
         return p;
       } else {
         return p;
       }
     });
-    console.log('setting policies',policies)
     setPolicies(policies);
   }
 
   const handleOracleReportEvent = newEvent => {
     if (newEvent.event === 'OracleReport') {
-      console.log('detected OracleReport event',newEvent);
       const params = JSON.parse(newEvent.params);
       setOracleReports(oracleReportsRef.current.concat(params));
       updateFlightStatus(params);
