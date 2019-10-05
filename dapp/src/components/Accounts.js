@@ -108,11 +108,7 @@ const Accounts = ({ready,accounts,setAccounts,forAirlines,forCustomers,status}) 
 
   const refreshAccounts = async (event,data) => {
       const web3 = await Web3();
-      // const {contract} = await contractService.init();
-      console.log('accounts in the effect',accounts);
-      // const accounts = accountsRef.current;
       for (let i=0; i < accounts.length; i++) {
-        console.log('account...',accounts[i]);
         accounts[i].balance = await web3.eth.getBalance(accounts[i].address);
         accounts[i].credit = await contract.getCreditBalance(accounts[i].address);
       } 
