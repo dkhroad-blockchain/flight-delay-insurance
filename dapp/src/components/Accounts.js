@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
+import React, {useState,useEffect} from 'react';
 import {Container,Header,Button,List,Card, Icon, Label, Image} from 'semantic-ui-react';
-import getWeb3 from '../utils/Web3';
+import Web3 from '../utils/Web3';
 import contract from '../services/contract';
 
 const Status = ({status}) => {
@@ -10,38 +10,33 @@ const Status = ({status}) => {
 }
 
 
-const AccountItem = ({account,icon}) => {
-  const [balance,setBalance] = useState('click to refresh');
-  const [credit,setCredit] = useState('click to refresh');
+const AccountItem = ({account,icon,balance,credit,handleWithdraw}) => {
+  // const [balance,setBalance] = useState('click to refresh');
+  // const [credit,setCredit] = useState('click to refresh');
 
-  const handleWithdraw = async (event, data) => {
-    event.preventDefault();
-    console.log('handleWithdraw clicked','event',event,'data',data.account);
-    const status = await contract.pay(data.account);
-    console.log('handleWithdraw status',status);
-  }
 
+    /*
   const handleCreditBalance = async (event,data) => {
     event.preventDefault();
     console.log('getCrditBalance clicked','event',event,'data',data.account);
     const bal = await  contract.getCreditBalance(data.account);
-    setCredit(bal);
+    // setCredit(bal);
     console.log('getCreditBalance response',bal);
   }
 
   const handleBalance = async (event,data) => {
     event.preventDefault();
-    const web3 = await getWeb3();
+    const web3 = await Web3();
     const balance = await web3.eth.getBalance(data.account)
-    setBalance(balance);
+    // setBalance(balance);
   }
+  */
 
   const creditItemDescription = () => {
     const hasCredit = credit != 'click to refresh' && credit != '0' ? true : false;
     const foo = 
       <>
-          <Label as='a' basic color='teal' onClick={handleCreditBalance} account={account}>
-            <Icon name='sync' /> 
+          <Label as='a' basic color='teal'  account={account}>
             Avail. Credit:
             <Label.Detail>
               {credit}
@@ -66,8 +61,7 @@ const AccountItem = ({account,icon}) => {
       <List.Header>{account}</List.Header>
       <List.Description>
         <>
-          <Label as='a'  basic color='blue' onClick={handleBalance} account={account}>
-            <Icon name='sync' /> 
+          <Label as='a'  basic color='blue'  account={account}>
             Balance: 
             <Label.Detail>{balance}</Label.Detail> 
           </Label> 
@@ -79,15 +73,21 @@ const AccountItem = ({account,icon}) => {
   )
 
 }
-const AccountList = ({accounts,icon,customer}) => {
+const AccountList = ({allAccounts,icon,customer,accounts,handleWithdraw}) => {
 
-
+  
   const accountAsItems = () =>  
     accounts.map((a,i) => { 
-      return <AccountItem  key={'_' + Math.random().toString(36).substring(2,9)} account={a} icon={icon} />
+      const account = allAccounts.find(account => account.address === a);
+      return <AccountItem  
+        key={'_' + Math.random().toString(36).substring(2,9)} 
+        account={a} 
+        balance={account.balance}
+        credit={account.credit}
+        handleWithdraw={handleWithdraw}
+        icon={icon} />
     });
   
-
   return (  
     <List divided relaxed  >
       {accountAsItems()}
@@ -96,38 +96,67 @@ const AccountList = ({accounts,icon,customer}) => {
 }
 
 
-const Account = ({ready,accounts}) => {
+const Accounts = ({ready,accounts,setAccounts,forAirlines,forCustomers,status}) =>  {
+
+  const handleWithdraw = async (event, data) => {
+    event.preventDefault();
+    console.log('handleWithdraw clicked','event',event,'data',data.account);
+    const status = await contract.pay(data.account);
+    console.log('handleWithdraw status',status);
+    refreshAccounts();
+  }
+
+  const refreshAccounts = async (event,data) => {
+      const web3 = await Web3();
+      // const {contract} = await contractService.init();
+      console.log('accounts in the effect',accounts);
+      // const accounts = accountsRef.current;
+      for (let i=0; i < accounts.length; i++) {
+        console.log('account...',accounts[i]);
+        accounts[i].balance = await web3.eth.getBalance(accounts[i].address);
+        accounts[i].credit = await contract.getCreditBalance(accounts[i].address);
+      } 
+      setAccounts(accounts.map(a => a));
+  }
+
+
+  const loadCustomerAccounts = () => {
     if (ready) {
       return (
-        <div>
-          { accounts.length > 0
-              ? 
-                <ul>
-                  {accounts.map( a => <li key={'_' + Math.random().toString(36).substring(2,9)}>{a}</li> )}
-                </ul>
-              : <div>No accounts</div>
-          }
-        </div>
-      )
+        <AccountList 
+          icon='user' 
+          customer 
+          allAccounts={accounts} 
+          accounts={forCustomers} 
+          handleWithdraw={handleWithdraw}
+        />)
+    } else {
+      return <div>Loading...</div>
+    }
+  }
+
+  const loadAirlineAccounts = () => {
+    if (ready) {
+      return (
+        <AccountList icon='plane' allAccounts={accounts}  accounts={forAirlines} />
+      ); 
     } else {
       return (
-        <div>Initalizing... please wait</div>
-      );
+        <div>Loading...</div>
+      )
     }
-}
+  }
 
-const Accounts = ({ready,forAirlines,forCustomers,status}) =>  {
-
-
-  const headerRow = ['Event','Transaction ID','Details'];
   return (
     <Container>
       <Header as='h3'>Customers</Header>
-      <AccountList icon='user' customer accounts={forCustomers} />
-
+      <Button  primary onClick={refreshAccounts}>
+        <Icon name="refresh" />
+        Refresh Balances 
+      </Button>
+      { loadCustomerAccounts()}
       <Header as='h3'>Airlines</Header>
-      <AccountList icon='plane'  accounts={forAirlines} />
-
+      { loadAirlineAccounts() }
 
       <Header as='h3'>Status</Header>
       <Status status={status} />

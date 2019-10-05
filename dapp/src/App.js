@@ -38,10 +38,9 @@ const App = () => {
   const [registeredFlights,setRegisteredFlights] = useState([]);
   const [errorMessage,setErrorMessage] = useState(null);
   const [infoMessage,setInfoMessage] = useState(null);
-  const [accounts,setAccounts] = useState(null);
+  const [accounts,setAccounts] = useState([]);
   const [policies,setPolicies] = useState([]);
   const [airlineRegFee,setAirlineRegFee] = useState('');
-  const [flightStatusUpdates,setFlightStatusUpdates] = useState([]);
 
 
   let regAirRef = useRef(registeredAirlines);
@@ -50,22 +49,24 @@ const App = () => {
   let dataEventsRef = useRef(dataEvents);
   let regFlightRef = useRef(registeredFlights);
   let policiesRef = useRef(policies);
-  // let flightStatusUpdatesRef = useRef(flightStatusUpdates);
+  let accountsRef = useRef(accounts);
 
   useEffect(  () => {
     const initWeb3 = async () => {
 
       try {
         const web3 = await Web3();
-        const _accounts = await web3.eth.getAccounts();
-        setAccounts(_accounts);
-        setPossibleAirlines(_accounts.slice(0,6));
-        setCustomers(_accounts.slice(-4)); 
+        const accounts = await web3.eth.getAccounts();
+        setPossibleAirlines(accounts.slice(0,6));
+        setCustomers(accounts.slice(-4)); 
         const {contract,dataContract} =  await contractService.init();
         const regFee = await contractService.airlineRegistrationFee();
         setAirlineRegFee(web3.utils.fromWei(regFee,'ether').toString());
-        const status = await contractService.isDataContractOperational(_accounts[0]);
+        const status = await contractService.isDataContractOperational(accounts[0]);
         setDataContractStatus(status);
+
+        setAccounts(accounts.map(a => ({address: a, balance: '0', credit: '0'})));
+        
 
         setWeb3Ready(true);
         setContractReady(true);
@@ -80,6 +81,7 @@ const App = () => {
     initWeb3();
 
   },[]);
+
 
   // this effect hook captures all data and app contract past events
   useEffect( () => {
@@ -113,7 +115,6 @@ const App = () => {
       console.log('already registeredAirlines',registeredOnly,funded);
       console.log('registerd flights',regFlights);
     })();
-    
   },[]);
 
   // this effect hook set up callbacks for the future contract events
@@ -134,7 +135,7 @@ const App = () => {
     dataEventsRef.current = dataEvents;
     regFlightRef.current = registeredFlights;
     policiesRef.current = policies;
-    // flightStatusUpdatesRef.current = flightStatusUpdates;
+    accountsRef.current = accounts;
   });
 
 
@@ -227,7 +228,6 @@ const App = () => {
   const handleFlightStatusUpdateEvent = newEvent => {
     if (newEvent.event === 'FlightStatusUpate') {
       const params = JSON.parse(newEvent.params);
-      // setFlightStatusUpdates(flightStatusUpdatesRef.current.contract(params));
       updateFlightStatus(params,policiesRef.current);
     }
   }
@@ -243,6 +243,8 @@ const App = () => {
           <Route exact path="/" render={() =>
             <Accounts 
               ready={web3Ready} 
+              accounts={accounts}
+              setAccounts={setAccounts}
               forAirlines={possibleAirlines} 
               forCustomers={customers}
 
