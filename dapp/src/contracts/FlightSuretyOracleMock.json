@@ -506,14 +506,14 @@
     "absolutePath": "/Users/dkhroad/Work/blockchain_dev/flight-delay-insurance/contracts/mocks/FlightSuretyOracleMock.sol",
     "exportedSymbols": {
       "FlightSuretyOracleMock": [
-        2690
+        2721
       ]
     },
-    "id": 2691,
+    "id": 2722,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2653,
+        "id": 2684,
         "literals": [
           "solidity",
           "^",
@@ -526,10 +526,10 @@
       {
         "absolutePath": "/Users/dkhroad/Work/blockchain_dev/flight-delay-insurance/contracts/FlightSuretyOracle.sol",
         "file": "../FlightSuretyOracle.sol",
-        "id": 2654,
+        "id": 2685,
         "nodeType": "ImportDirective",
-        "scope": 2691,
-        "sourceUnit": 2127,
+        "scope": 2722,
+        "sourceUnit": 2156,
         "src": "25:35:6",
         "symbolAliases": [],
         "unitAlias": ""
@@ -540,17 +540,17 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2655,
+              "id": 2686,
               "name": "Pausable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3218,
+              "referencedDeclaration": 3249,
               "src": "97:8:6",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Pausable_$3218",
+                "typeIdentifier": "t_contract$_Pausable_$3249",
                 "typeString": "contract Pausable"
               }
             },
-            "id": 2656,
+            "id": 2687,
             "nodeType": "InheritanceSpecifier",
             "src": "97:8:6"
           },
@@ -558,17 +558,17 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2657,
+              "id": 2688,
               "name": "WhitelistAdminRole",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3133,
+              "referencedDeclaration": 3164,
               "src": "107:18:6",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_WhitelistAdminRole_$3133",
+                "typeIdentifier": "t_contract$_WhitelistAdminRole_$3164",
                 "typeString": "contract WhitelistAdminRole"
               }
             },
-            "id": 2658,
+            "id": 2689,
             "nodeType": "InheritanceSpecifier",
             "src": "107:18:6"
           },
@@ -576,37 +576,37 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2659,
+              "id": 2690,
               "name": "FlightSuretyOracle",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2126,
+              "referencedDeclaration": 2155,
               "src": "127:18:6",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_FlightSuretyOracle_$2126",
+                "typeIdentifier": "t_contract$_FlightSuretyOracle_$2155",
                 "typeString": "contract FlightSuretyOracle"
               }
             },
-            "id": 2660,
+            "id": 2691,
             "nodeType": "InheritanceSpecifier",
             "src": "127:18:6"
           }
         ],
         "contractDependencies": [
-          2126,
-          2925,
-          3133,
-          3218
+          2155,
+          2956,
+          3164,
+          3249
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 2690,
+        "id": 2721,
         "linearizedBaseContracts": [
-          2690,
-          2126,
-          3133,
-          3218,
-          2925
+          2721,
+          2155,
+          3164,
+          3249,
+          2956
         ],
         "name": "FlightSuretyOracleMock",
         "nodeType": "ContractDefinition",
@@ -614,20 +614,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 2670,
+            "id": 2701,
             "name": "ProcessFlightStatus",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 2669,
+              "id": 2700,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2662,
+                  "id": 2693,
                   "indexed": false,
                   "name": "airline",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2670,
+                  "scope": 2701,
                   "src": "179:15:6",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -636,7 +636,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2661,
+                    "id": 2692,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "179:7:6",
@@ -651,11 +651,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2664,
+                  "id": 2695,
                   "indexed": false,
                   "name": "flight",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2670,
+                  "scope": 2701,
                   "src": "196:13:6",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -664,7 +664,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 2663,
+                    "id": 2694,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "196:6:6",
@@ -678,11 +678,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2666,
+                  "id": 2697,
                   "indexed": false,
                   "name": "timestamp",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2670,
+                  "scope": 2701,
                   "src": "210:17:6",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -691,7 +691,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2665,
+                    "id": 2696,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "210:7:6",
@@ -705,11 +705,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2668,
+                  "id": 2699,
                   "indexed": false,
                   "name": "status",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2670,
+                  "scope": 2701,
                   "src": "229:14:6",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -718,7 +718,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2667,
+                    "id": 2698,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "229:7:6",
@@ -737,7 +737,7 @@
           },
           {
             "body": {
-              "id": 2688,
+              "id": 2719,
               "nodeType": "Block",
               "src": "405:78:6",
               "statements": [
@@ -747,11 +747,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2682,
+                        "id": 2713,
                         "name": "airline",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2672,
+                        "referencedDeclaration": 2703,
                         "src": "440:7:6",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -760,11 +760,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2683,
+                        "id": 2714,
                         "name": "flight",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2674,
+                        "referencedDeclaration": 2705,
                         "src": "448:6:6",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory_ptr",
@@ -773,11 +773,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2684,
+                        "id": 2715,
                         "name": "timestamp",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2676,
+                        "referencedDeclaration": 2707,
                         "src": "455:9:6",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -786,11 +786,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2685,
+                        "id": 2716,
                         "name": "statusCode",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2678,
+                        "referencedDeclaration": 2709,
                         "src": "465:10:6",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -817,18 +817,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 2681,
+                      "id": 2712,
                       "name": "ProcessFlightStatus",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2670,
+                      "referencedDeclaration": 2701,
                       "src": "420:19:6",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_string_memory_ptr_$_t_uint256_$_t_uint256_$returns$__$",
                         "typeString": "function (address,string memory,uint256,uint256)"
                       }
                     },
-                    "id": 2686,
+                    "id": 2717,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -842,29 +842,29 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2687,
+                  "id": 2718,
                   "nodeType": "EmitStatement",
                   "src": "415:61:6"
                 }
               ]
             },
             "documentation": null,
-            "id": 2689,
+            "id": 2720,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "processFlightStatus",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2679,
+              "id": 2710,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2672,
+                  "id": 2703,
                   "name": "airline",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2689,
+                  "scope": 2720,
                   "src": "289:15:6",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -873,7 +873,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2671,
+                    "id": 2702,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "289:7:6",
@@ -888,10 +888,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2674,
+                  "id": 2705,
                   "name": "flight",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2689,
+                  "scope": 2720,
                   "src": "314:20:6",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -900,7 +900,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 2673,
+                    "id": 2704,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "314:6:6",
@@ -914,10 +914,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2676,
+                  "id": 2707,
                   "name": "timestamp",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2689,
+                  "scope": 2720,
                   "src": "344:17:6",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -926,7 +926,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2675,
+                    "id": 2706,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "344:7:6",
@@ -940,10 +940,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2678,
+                  "id": 2709,
                   "name": "statusCode",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2689,
+                  "scope": 2720,
                   "src": "371:18:6",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -952,7 +952,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2677,
+                    "id": 2708,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "371:7:6",
@@ -968,19 +968,19 @@
               "src": "279:116:6"
             },
             "returnParameters": {
-              "id": 2680,
+              "id": 2711,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "405:0:6"
             },
-            "scope": 2690,
+            "scope": 2721,
             "src": "251:232:6",
             "stateMutability": "nonpayable",
-            "superFunction": 1695,
+            "superFunction": 1724,
             "visibility": "internal"
           }
         ],
-        "scope": 2691,
+        "scope": 2722,
         "src": "62:424:6"
       }
     ],
@@ -990,14 +990,14 @@
     "absolutePath": "/Users/dkhroad/Work/blockchain_dev/flight-delay-insurance/contracts/mocks/FlightSuretyOracleMock.sol",
     "exportedSymbols": {
       "FlightSuretyOracleMock": [
-        2690
+        2721
       ]
     },
-    "id": 2691,
+    "id": 2722,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2653,
+        "id": 2684,
         "literals": [
           "solidity",
           "^",
@@ -1010,10 +1010,10 @@
       {
         "absolutePath": "/Users/dkhroad/Work/blockchain_dev/flight-delay-insurance/contracts/FlightSuretyOracle.sol",
         "file": "../FlightSuretyOracle.sol",
-        "id": 2654,
+        "id": 2685,
         "nodeType": "ImportDirective",
-        "scope": 2691,
-        "sourceUnit": 2127,
+        "scope": 2722,
+        "sourceUnit": 2156,
         "src": "25:35:6",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1024,17 +1024,17 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2655,
+              "id": 2686,
               "name": "Pausable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3218,
+              "referencedDeclaration": 3249,
               "src": "97:8:6",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Pausable_$3218",
+                "typeIdentifier": "t_contract$_Pausable_$3249",
                 "typeString": "contract Pausable"
               }
             },
-            "id": 2656,
+            "id": 2687,
             "nodeType": "InheritanceSpecifier",
             "src": "97:8:6"
           },
@@ -1042,17 +1042,17 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2657,
+              "id": 2688,
               "name": "WhitelistAdminRole",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3133,
+              "referencedDeclaration": 3164,
               "src": "107:18:6",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_WhitelistAdminRole_$3133",
+                "typeIdentifier": "t_contract$_WhitelistAdminRole_$3164",
                 "typeString": "contract WhitelistAdminRole"
               }
             },
-            "id": 2658,
+            "id": 2689,
             "nodeType": "InheritanceSpecifier",
             "src": "107:18:6"
           },
@@ -1060,37 +1060,37 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2659,
+              "id": 2690,
               "name": "FlightSuretyOracle",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2126,
+              "referencedDeclaration": 2155,
               "src": "127:18:6",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_FlightSuretyOracle_$2126",
+                "typeIdentifier": "t_contract$_FlightSuretyOracle_$2155",
                 "typeString": "contract FlightSuretyOracle"
               }
             },
-            "id": 2660,
+            "id": 2691,
             "nodeType": "InheritanceSpecifier",
             "src": "127:18:6"
           }
         ],
         "contractDependencies": [
-          2126,
-          2925,
-          3133,
-          3218
+          2155,
+          2956,
+          3164,
+          3249
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 2690,
+        "id": 2721,
         "linearizedBaseContracts": [
-          2690,
-          2126,
-          3133,
-          3218,
-          2925
+          2721,
+          2155,
+          3164,
+          3249,
+          2956
         ],
         "name": "FlightSuretyOracleMock",
         "nodeType": "ContractDefinition",
@@ -1098,20 +1098,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 2670,
+            "id": 2701,
             "name": "ProcessFlightStatus",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 2669,
+              "id": 2700,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2662,
+                  "id": 2693,
                   "indexed": false,
                   "name": "airline",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2670,
+                  "scope": 2701,
                   "src": "179:15:6",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1120,7 +1120,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2661,
+                    "id": 2692,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "179:7:6",
@@ -1135,11 +1135,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2664,
+                  "id": 2695,
                   "indexed": false,
                   "name": "flight",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2670,
+                  "scope": 2701,
                   "src": "196:13:6",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1148,7 +1148,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 2663,
+                    "id": 2694,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "196:6:6",
@@ -1162,11 +1162,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2666,
+                  "id": 2697,
                   "indexed": false,
                   "name": "timestamp",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2670,
+                  "scope": 2701,
                   "src": "210:17:6",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1175,7 +1175,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2665,
+                    "id": 2696,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "210:7:6",
@@ -1189,11 +1189,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2668,
+                  "id": 2699,
                   "indexed": false,
                   "name": "status",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2670,
+                  "scope": 2701,
                   "src": "229:14:6",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1202,7 +1202,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2667,
+                    "id": 2698,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "229:7:6",
@@ -1221,7 +1221,7 @@
           },
           {
             "body": {
-              "id": 2688,
+              "id": 2719,
               "nodeType": "Block",
               "src": "405:78:6",
               "statements": [
@@ -1231,11 +1231,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2682,
+                        "id": 2713,
                         "name": "airline",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2672,
+                        "referencedDeclaration": 2703,
                         "src": "440:7:6",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1244,11 +1244,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2683,
+                        "id": 2714,
                         "name": "flight",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2674,
+                        "referencedDeclaration": 2705,
                         "src": "448:6:6",
                         "typeDescriptions": {
                           "typeIdentifier": "t_string_memory_ptr",
@@ -1257,11 +1257,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2684,
+                        "id": 2715,
                         "name": "timestamp",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2676,
+                        "referencedDeclaration": 2707,
                         "src": "455:9:6",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1270,11 +1270,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2685,
+                        "id": 2716,
                         "name": "statusCode",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2678,
+                        "referencedDeclaration": 2709,
                         "src": "465:10:6",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1301,18 +1301,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 2681,
+                      "id": 2712,
                       "name": "ProcessFlightStatus",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2670,
+                      "referencedDeclaration": 2701,
                       "src": "420:19:6",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_string_memory_ptr_$_t_uint256_$_t_uint256_$returns$__$",
                         "typeString": "function (address,string memory,uint256,uint256)"
                       }
                     },
-                    "id": 2686,
+                    "id": 2717,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1326,29 +1326,29 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 2687,
+                  "id": 2718,
                   "nodeType": "EmitStatement",
                   "src": "415:61:6"
                 }
               ]
             },
             "documentation": null,
-            "id": 2689,
+            "id": 2720,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "processFlightStatus",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2679,
+              "id": 2710,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2672,
+                  "id": 2703,
                   "name": "airline",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2689,
+                  "scope": 2720,
                   "src": "289:15:6",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1357,7 +1357,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2671,
+                    "id": 2702,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "289:7:6",
@@ -1372,10 +1372,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2674,
+                  "id": 2705,
                   "name": "flight",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2689,
+                  "scope": 2720,
                   "src": "314:20:6",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1384,7 +1384,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 2673,
+                    "id": 2704,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "314:6:6",
@@ -1398,10 +1398,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2676,
+                  "id": 2707,
                   "name": "timestamp",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2689,
+                  "scope": 2720,
                   "src": "344:17:6",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1410,7 +1410,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2675,
+                    "id": 2706,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "344:7:6",
@@ -1424,10 +1424,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 2678,
+                  "id": 2709,
                   "name": "statusCode",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2689,
+                  "scope": 2720,
                   "src": "371:18:6",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1436,7 +1436,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2677,
+                    "id": 2708,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "371:7:6",
@@ -1452,19 +1452,19 @@
               "src": "279:116:6"
             },
             "returnParameters": {
-              "id": 2680,
+              "id": 2711,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "405:0:6"
             },
-            "scope": 2690,
+            "scope": 2721,
             "src": "251:232:6",
             "stateMutability": "nonpayable",
-            "superFunction": 1695,
+            "superFunction": 1724,
             "visibility": "internal"
           }
         ],
-        "scope": 2691,
+        "scope": 2722,
         "src": "62:424:6"
       }
     ],
@@ -1476,7 +1476,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.16",
-  "updatedAt": "2019-09-25T20:05:37.817Z",
+  "updatedAt": "2019-10-03T05:50:39.959Z",
   "devdoc": {
     "methods": {
       "pause()": {
