@@ -20,6 +20,8 @@ const BuyForm = ({
   handleFundAmountChange,
   onFundAmountError,
 
+  fundUnit,
+  handleFundUnitChange,
   flightTime,
 
   customers,
@@ -38,9 +40,17 @@ const BuyForm = ({
     return o;
   }
 
-  // const flightTime = () => {
-  //   return new Date().toLocaleString();
-  // }
+  const etherUnitOptons = () => 
+    [
+      'ether',
+      'milli',
+      'milliether',
+      'finney',
+      'micro',
+      'microether'
+    ].map(u => ({value: u, text: u} ));
+  
+
 
   return (
     <>
@@ -77,10 +87,21 @@ const BuyForm = ({
             required
             label='Funds'
             value={fundAmount}
-            placeholder='Min: 1 Ether'
+            placeholder='Max: 1 Ether'
             error={onFundAmountError}
             onChange={handleFundAmountChange}
           />
+
+
+          <Form.Select  
+            label='Unit'
+            placeholder='Ether unit'
+            options={etherUnitOptons()}
+            value={fundUnit}
+            onChange={handleFundUnitChange}
+          />
+
+          
 
           <Form.Select 
             required

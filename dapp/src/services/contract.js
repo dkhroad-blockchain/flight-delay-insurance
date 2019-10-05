@@ -75,12 +75,12 @@ const registerFlight = async (airline,flight,timestamp) => {
   return status;
 }
 
-const buy = async (airline,flight,timestamp,funds,caller) => {
+const buy = async (airline,flight,timestamp,funds,fundUnit,caller) => {
   const {buy} = flightSuretyApp.methods;
   const status = await buy(airline,flight,timestamp)
     .send({
       from: caller, 
-      value: web3.utils.toWei(funds,'ether')
+      value: web3.utils.toWei(funds, fundUnit)
     });
   return status;
 }

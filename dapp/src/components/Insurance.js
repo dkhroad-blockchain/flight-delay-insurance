@@ -24,6 +24,7 @@ const Insurance = ({
 
   const [fundAmount,setFundAmount] = useState('');
   const [fundAmountError,setFundAmountError] = useState(null);
+  const [fundUnit,setFundUnit] = useState('ether');
 
   const [buyer,setBuyer] = useState('');
   const [buyerError,setBuyerError] = useState(null);
@@ -37,6 +38,11 @@ const Insurance = ({
   const handleFlightNameChange = (e,{value}) => {
     setFlightName(value);
     setFlightTime(getTimeFor(value));
+  }
+
+  const handleFundUnitChange = (e,{value}) => {
+    console.log('changing fundUnit',value);
+    setFundUnit(value);
   }
 
   const timestampToDate = (timestamp) =>  
@@ -88,8 +94,8 @@ const Insurance = ({
       setLoading(true);
 
       const flight = flightFor(airlineAddress,flightName);
-      console.log('in Insurance buy submit...',flight,buyer,fundAmount);
-      const status = await contract.buy(flight.airline,flight.name,flight.timestamp,fundAmount,buyer);
+      console.log('in Insurance buy submit...',flight,buyer,fundAmount,fundUnit);
+      const status = await contract.buy(flight.airline,flight.name,flight.timestamp,fundAmount,fundUnit,buyer);
       console.log('buy status:',status);
 
       clearFormFields();
@@ -149,6 +155,9 @@ const Insurance = ({
         fundAmount={fundAmount}
         handleFundAmountChange={handleFundAmountChange}
         onFundAmountError={fundAmountError}
+
+        fundUnit={fundUnit}
+        handleFundUnitChange={handleFundUnitChange}
 
         customers={customers}
         buyer={buyer}
