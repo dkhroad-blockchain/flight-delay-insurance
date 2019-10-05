@@ -14,7 +14,7 @@ const config = require('./utils/config');
 let oracles = [];
 
 const getOracleAccounts = (web3,accounts) => {
-  return accounts.slice(config.ORACLE_ACCOUNTS_STARTING_INDEX);
+  return accounts.slice(-config.ORACLE_NUM_ACCOUNTS);
 }
 
 const registerOracles = async (contract,accounts) => {

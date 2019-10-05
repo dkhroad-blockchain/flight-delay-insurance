@@ -1,7 +1,6 @@
 const Web3 = require('web3');
 const config = require('./config');
 const logger = require('./logger');
-const FlightSuretyApp = require('../../../build/contracts/FlightSuretyApp.json');
 
 
 let web3 = undefined

@@ -1,6 +1,6 @@
 const logger = require('./utils/logger');
 const Web3 = require('./utils/Web3');
-const FlightSuretyApp = require('../../build/contracts/FlightSuretyApp.json');
+const FlightSuretyApp = require('../build/contracts/FlightSuretyApp.json');
 
 let flightSuretyApp = undefined;
 let web3 = undefined;

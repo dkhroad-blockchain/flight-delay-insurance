@@ -7,10 +7,10 @@
   },
   "scripts": {
     "test": "truffle test ",
-    "dapp": "webpack-dev-server --mode development --config webpack.config.dapp.js",
-    "dapp:prod": "webpack --mode production --config webpack.config.dapp.js",
-    "start": "NODE_ENV=production node ./src/server/index.js",
-    "watch": "nodemon ./src/server/index.js"
+    "dapp": "cd ./dapp && npm run migrate && npm run start",
+    "dapp:prod": "cd ./dapp && npm run migrate && npm run build",
+    "server": "NODE_ENV=production node ./server/index.js",
+    "watch": "nodemon ./server/index.js"
   },
   "repository": {
     "type": "git",
