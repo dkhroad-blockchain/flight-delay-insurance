@@ -15,6 +15,7 @@ import Airline from './components/Airline';
 import Flight from './components/Flight';
 import NavBar from './components/NavBar';
 import Insurance from './components/Insurance.js';
+import Admin from './components/Admin.js';
 import Notification, {ErrorNotification} from './components/Notification';
 import {filterEvents, processEvents} from './utils/events';
 import EventTabs from './components/Events';
@@ -40,8 +41,7 @@ const App = () => {
   const [accounts,setAccounts] = useState(null);
   const [policies,setPolicies] = useState([]);
   const [airlineRegFee,setAirlineRegFee] = useState('');
-  const [oracleRequests,setOracleRequests] = useState([]);
-  const [oracleReports,setOracleReports] = useState([]);
+  const [flightStatusUpdates,setFlightStatusUpdates] = useState([]);
 
 
   let regAirRef = useRef(registeredAirlines);
@@ -50,7 +50,7 @@ const App = () => {
   let dataEventsRef = useRef(dataEvents);
   let regFlightRef = useRef(registeredFlights);
   let policiesRef = useRef(policies);
-  let oracleReportsRef  = useRef(oracleReports);
+  // let flightStatusUpdatesRef = useRef(flightStatusUpdates);
 
   useEffect(  () => {
     const initWeb3 = async () => {
@@ -90,10 +90,6 @@ const App = () => {
       let pastEvents = await contract.getPastEvents( {fromBlock: 0});
       pastEvents = processEvents(pastEvents);
       setAppEvents(pastEvents);
-      const oracleRequests = filterEvents(pastEvents,'OracleRequest');
-      setOracleRequests(oracleRequests);
-      const oracleReports = filterEvents(pastEvents,'OracleReport');
-      setOracleReports(oracleReports);
 
       pastEvents = await dataContract.getPastEvents( {fromBlock: 0});
       pastEvents = processEvents(pastEvents);
@@ -103,6 +99,8 @@ const App = () => {
       const funded = filterEvents(pastEvents,'AirlineFunded','airline');
       const registeredOnly = registered.filter(account => -1 === funded.indexOf(account));
       const regFlights = filterEvents(pastEvents,'FlightRegistered');
+      const flightStatusUpdates = filterEvents(pastEvents,'FlightStatusUpdate');
+
 
       setRegisterdAirlnes(registeredOnly);
       setFundedAirlines(funded);
@@ -110,7 +108,7 @@ const App = () => {
 
       const policies = filterEvents(pastEvents,'PolicyPurchased');
       setPolicies(policies);
-      oracleReports.forEach(report => updateFlightStatus(report));
+      flightStatusUpdates.forEach(report => updateFlightStatus(report,policies));
       console.log('existing policees',policies);
       console.log('already registeredAirlines',registeredOnly,funded);
       console.log('registerd flights',regFlights);
@@ -136,7 +134,7 @@ const App = () => {
     dataEventsRef.current = dataEvents;
     regFlightRef.current = registeredFlights;
     policiesRef.current = policies;
-    oracleReportsRef.current = oracleReports;
+    // flightStatusUpdatesRef.current = flightStatusUpdates;
   });
 
 
@@ -146,7 +144,6 @@ const App = () => {
     } else {
     
       const newEvent = processEvents([evt]);
-      handleOracleReportEvent(newEvent[0]);
       setAppEvents(appEventsRef.current.concat(newEvent));
     }
   }
@@ -161,6 +158,7 @@ const App = () => {
       handleFundedAirlineEvent(newEvent[0]);
       handleRegisterFlightEvent(newEvent[0]);
       handlePolicyPurchasedEvent(newEvent[0]);
+      handleFlightStatusUpdateEvent(newEvent[0]);
       // console.log('all dataEvents 2', dataEvents.concat(newEvent));
       setDataEvents(dataEventsRef.current.concat(newEvent));
       
@@ -212,8 +210,10 @@ const App = () => {
 
   }
 
-  const updateFlightStatus = ({airline,flight,timestamp,status}) => {
-    const policies = policiesRef.current.map(p => {
+  const updateFlightStatus = ({airline,flight,timestamp,status},policies) => {
+    console.log('in updateFlightStatus', airline, flight,timestamp,status); 
+    console.log('policies',policies);
+    const updatedPolicies = policies.map(p => {
       if (p.airline === airline && p.flight === flight && p.timestamp === timestamp) {
         p.status = status;
         return p;
@@ -221,16 +221,17 @@ const App = () => {
         return p;
       }
     });
-    setPolicies(policies);
+    setPolicies(updatedPolicies);
   }
 
-  const handleOracleReportEvent = newEvent => {
-    if (newEvent.event === 'OracleReport') {
+  const handleFlightStatusUpdateEvent = newEvent => {
+    if (newEvent.event === 'FlightStatusUpate') {
       const params = JSON.parse(newEvent.params);
-      setOracleReports(oracleReportsRef.current.concat(params));
-      updateFlightStatus(params);
+      // setFlightStatusUpdates(flightStatusUpdatesRef.current.contract(params));
+      updateFlightStatus(params,policiesRef.current);
     }
   }
+
 
 
   return (
@@ -285,6 +286,19 @@ const App = () => {
               <EventTabs 
                 appEvents={appEvents}  
                 dataEvents={dataEvents}
+              />
+            }
+          />
+          <Route
+            path="/admin" render={() => 
+              <Admin
+                setErrorMessage={setErrorMessage} 
+                setInfoMessage={setInfoMessage}  
+                registeredFlights={registeredFlights}
+                customers={customers}
+                policies={policies}
+                fundedAirlines={fundedAirlines}
+                admin={possibleAirlines[0]}
               />
             }
           />

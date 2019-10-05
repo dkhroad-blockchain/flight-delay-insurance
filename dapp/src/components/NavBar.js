@@ -7,11 +7,8 @@ const NavBar = ({match,location,history}) => {
   const [activeItem,setActiveItem] = useState('accounts');
   const handleItemClick = (e, { name}) => setActiveItem(name);
 
-  const ai =  location.pathname.split('/')[1];
-
-  if (ai !== activeItem) {
-    setActiveItem(ai);
-  }
+  // const ai =  location.pathname.split('/')[1];
+  // setActiveItem(ai);
 
   return (
     <Segment inverted>
@@ -54,6 +51,14 @@ const NavBar = ({match,location,history}) => {
           active={activeItem === 'events'} 
           onClick={handleItemClick}
           link as={Link} to='/events'
+        >
+        </Menu.Item>
+        <Menu.Item 
+          name='admin' 
+          content='Admin'
+          active={activeItem === 'admin'} 
+          onClick={handleItemClick}
+          link as={Link} to='/admin'
         >
         </Menu.Item>
       </Menu>

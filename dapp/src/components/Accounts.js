@@ -14,9 +14,11 @@ const AccountItem = ({account,icon}) => {
   const [balance,setBalance] = useState('click to refresh');
   const [credit,setCredit] = useState('click to refresh');
 
-  const handleWithdraw = (event, data) => {
+  const handleWithdraw = async (event, data) => {
     event.preventDefault();
     console.log('handleWithdraw clicked','event',event,'data',data.account);
+    const status = await contract.pay(data.account);
+    console.log('handleWithdraw status',status);
   }
 
   const handleCreditBalance = async (event,data) => {

@@ -91,6 +91,31 @@ const fetchFlightStatus = async (airline,flight,timestamp,caller) => {
   return status;
 }
 
+const getCreditBalance = async (customer) => {
+  const {getCreditBalance } = flightSuretyApp.methods;
+  const balance = await getCreditBalance(customer).call({from: customer});
+  return balance;
+}
+
+const setFlightStatus = async(airline,flight,timestamp,flightStatus,requester) => {
+  const { setFlightStatus } = flightSuretyApp.methods;
+  const status = await 
+    setFlightStatus(
+      airline,
+      flight,
+      timestamp,
+      flightStatus
+    )
+    .send({ from: requester});
+  return status;
+}
+
+const pay = async (caller) => {
+  const {pay} = flightSuretyApp.methods;
+  const status = await pay().send({from: caller});
+  return status;
+}
+
 
 export default { 
   init,
@@ -100,5 +125,8 @@ export default {
   fundAirline,
   registerFlight,
   buy,
-  fetchFlightStatus
+  fetchFlightStatus,
+  getCreditBalance,
+  setFlightStatus,
+  pay,
 }
