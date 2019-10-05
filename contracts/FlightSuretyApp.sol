@@ -246,6 +246,14 @@ contract FlightSuretyApp is Ownable, Pausable, MultiSig, FlightSuretyOracle {
         );
     }
 
+    /**
+      @dev get credit balance for a customer
+      */
+     function getCreditBalance(address customer) external view whenNotPaused returns(uint256) {
+        require(customer != address(0x0),"Invalid customer address");
+        return flightSuretyDataContract.getCreditBalance(customer);
+     }
+
 
     /**
      *  @dev Transfers eligible payout funds to insuree

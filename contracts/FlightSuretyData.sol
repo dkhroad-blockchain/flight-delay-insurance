@@ -333,12 +333,22 @@ contract FlightSuretyData is IFlightSuretyData, Pausable, Ownable {
 
 
     /**
+      @dev get credit balance for a customer
+      */
+     function getCreditBalance(address customer) external view whenNotPaused returns(uint256) {
+        require(customer != address(0x0),"Invalid customer address");
+         return creditBalances[customer]; 
+     }
+
+
+    /**
     * @dev Fallback function for funding smart contract.
     *
     */
     function() external payable whenNotPaused {
         require(msg.data.length == 0,"payload not allowed");
     }
+
 
 
 }

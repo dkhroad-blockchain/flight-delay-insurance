@@ -62,7 +62,11 @@ contract IFlightSuretyData {
      *  @dev Credits payouts to insurees
     */
     function creditInsurees(uint256 policy,FlightStatus staus,uint256 multiple) external;
-    
+   
+    /**
+      * @dev inquire about credit balance
+      */
+    function getCreditBalance(address customer) external view returns(uint256);
 
     /**
      *  @dev Transfers eligible payout funds to insuree
