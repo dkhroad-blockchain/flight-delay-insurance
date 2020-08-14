@@ -1,7 +1,6 @@
 # flight-delay-insurance
 Ethereum blockchain based decentralized application (DApp) for flight delay insurance. 
 
-
 ## Install
 
 This repository contains Smart Contract code in Solidity (using Truffle), tests (also using Truffle), React based dApp and server app.
